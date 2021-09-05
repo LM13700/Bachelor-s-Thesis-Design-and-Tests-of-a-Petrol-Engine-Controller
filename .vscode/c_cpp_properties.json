@@ -1,0 +1,32 @@
+{
+    "configurations": [
+        {
+            "name": "ECU - Debug",
+            "includePath": [
+                "${env:VSARM}\\GNU Arm Embedded Toolchain\\10 2021.07\\arm-none-eabi\\include\\c++\\10.3.1",
+                "${env:VSARM}\\GNU Arm Embedded Toolchain\\10 2021.07\\arm-none-eabi\\include\\c++\\10.3.1\\arm-none-eabi",
+                "${env:VSARM}\\GNU Arm Embedded Toolchain\\10 2021.07\\arm-none-eabi\\include\\c++\\10.3.1\\backward",
+                "${env:VSARM}\\Embedded\\GNU Arm Embedded Toolchain\\10 2021.07\\lib\\gcc\\arm-none-eabi\\10.3.1\\include",
+                "${env:VSARM}\\Embedded\\GNU Arm Embedded Toolchain\\10 2021.07\\lib\\gcc\\arm-none-eabi\\10.3.1\\include-fixed",
+                "${env:VSARM}/armcc/arm-none-eabi/include",
+                "${workspaceRoot}/Drivers/CMSIS/Include/",
+                "${workspaceRoot}/Drivers/CMSIS/Include/",
+                "${workspaceRoot}/Drivers/CMSIS/Device/ST/STM32F4xx/Include/",
+                "${workspaceRoot}/Core/Inc",
+                "${workspaceRoot}/Core/Src"
+            ],
+            "defines": [
+                "DEBUG",
+                "FLOAT_ABI_HARD",
+                "UNICODE",
+                "_UNICODE"
+            ],
+            "windowsSdkVersion": "10.0.19041.0",
+            "compilerPath": "\"${env:VSARM}\\GNU Arm Embedded Toolchain\\10 2021.07\\bin/arm-none-eabi-gcc.exe\" -fno-ms-extensions",
+            "cStandard": "c99",
+            "cppStandard": "c++11",
+            "intelliSenseMode": "gcc-arm"
+        }
+    ],
+    "version": 4
+}
