@@ -10,7 +10,6 @@ TARGET = ECU
 # debug build?
 DEBUG = 1
 RM := rm -rf
-NO_ECHO := @
 
 
 #######################################
@@ -95,7 +94,7 @@ ifeq ($(DEBUG), 1)
 CFLAGS += -g -gdwarf-2 -DDEBUG
 OPT += -Og
 else
-	OPT += -O2
+OPT += -O2
 endif
 
 # Generate dependency information
@@ -129,28 +128,22 @@ vpath %.s $(sort $(dir $(ASM_SOURCES)))
 
 $(BUILD_DIR)/%.o: %.c Makefile | $(BUILD_DIR) 
 	$(CC) -c $(CFLAGS) -Wa,-a,-ad,-alms=$(BUILD_DIR)/$(notdir $(<:.c=.lst)) $< -o $@
-	@echo
 
 $(BUILD_DIR)/%.o: %.s Makefile | $(BUILD_DIR)
 	$(AS) -c $(CFLAGS) $< -o $@
-	@echo
 
 $(BUILD_DIR)/$(TARGET).elf: $(OBJECTS) Makefile
 	$(CC) $(OBJECTS) $(LDFLAGS) -o $@
 	$(SZ) $@
-	@echo
 
 $(BUILD_DIR)/%.hex: $(BUILD_DIR)/%.elf | $(BUILD_DIR)
 	$(HEX) $< $@
-	@echo
 
 $(BUILD_DIR)/%.bin: $(BUILD_DIR)/%.elf | $(BUILD_DIR)
 	$(BIN) $< $@
-	@echo
 
 $(BUILD_DIR):
 	mkdir $@
-	@echo
 
 #######################################
 # clean up
