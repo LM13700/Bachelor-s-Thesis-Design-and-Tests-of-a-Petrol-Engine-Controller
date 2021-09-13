@@ -1,12 +1,12 @@
 /*===========================================================================*
- * File:        main.h
+ * File:        common_include.h
  * Project:     ECU
  * Author:      Mateusz Mroz
- * Date:        06.09.2021
- * Brief:       Main.h
+ * Date:        13.09.2021
+ * Brief:       Common include headers
  *===========================================================================*/
-#ifndef _MAIN_H_
-#define _MAIN_H_
+#ifndef _COMMON_INCLUDE_H_
+#define _COMMON_INCLUDE_H_
 
 /*===========================================================================*
  *
@@ -14,7 +14,10 @@
  *
  *===========================================================================*/
 
-#include "common_include.h"
+#include "stm32f411xe.h"
+
+#include "stdint.h"
+#include "stdbool.h"
 
 /*===========================================================================*
  *

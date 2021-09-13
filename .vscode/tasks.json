@@ -4,7 +4,7 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "Debug build",
+            "label": "Build Debug",
             "type": "shell",
             "command": "make -j8 all DEBUG=1",
             "group": {
@@ -13,13 +13,25 @@
             }
         },
         {
-            "label": "Release build",
+            "label": "Rebuild Debug",
+            "type": "shell",
+            "dependsOrder": "sequence",
+            "dependsOn": ["Clean", "Build Debug"]
+        },
+        {
+            "label": "Build Release",
             "type": "shell",
             "command": "make -j8 all DEBUG=0",
             "group": {
                 "kind": "build",
                 "isDefault": true
             }
+        },
+        {
+            "label": "Reuild Release",
+            "type": "shell",
+            "dependsOrder": "sequence",
+            "dependsOn": ["Clean", "Build Release"]
         },
         {
             "label": "Clean",

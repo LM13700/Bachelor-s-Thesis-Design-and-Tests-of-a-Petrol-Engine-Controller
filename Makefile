@@ -1,4 +1,4 @@
-PROJECT_NAME := es6
+TARGET := ECU
 BUILD_DIR := build
 
 DEBUG = 1
@@ -10,8 +10,6 @@ ifeq ($(VERBOSE),1)
 else
   NO_ECHO := @
 endif
-
-TARGET := PROJECT_NAME
 
 MK := mkdir
 RM := del /q
