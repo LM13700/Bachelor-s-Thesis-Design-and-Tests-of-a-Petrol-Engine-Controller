@@ -13,7 +13,8 @@
             "cwd": "${workspaceRoot}",
             "executable": "./build/ECU.elf",
             "request": "launch",
-            "svdFile": "${workspaceRoot}/STM32F411.svd"
+            "svdFile": "${workspaceRoot}/STM32F411.svd",
+            "breakAfterReset": true
         }
     ]
 }

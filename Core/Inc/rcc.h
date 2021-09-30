@@ -14,6 +14,8 @@
  *
  *===========================================================================*/
 
+#include "common_include.h"
+
 /*===========================================================================*
  *
  * EXPORTED DEFINES AND MACRO SECTION
@@ -43,7 +45,7 @@
  * param[in]:   None
  * param[out]:  None
  * return:      None
- * details:     None
+ * details:     Initialize external 25[MHz] HSE, max speed APBx and AHB clocks
  *===========================================================================*/
 void RCC_ClockInit(void);
 

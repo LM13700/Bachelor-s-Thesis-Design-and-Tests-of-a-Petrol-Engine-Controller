@@ -64,7 +64,7 @@ static void Main_MsDelay(uint32_t ms);
  *===========================================================================*/
 int main(void)
 {
-    RCC_ClockInit();
+    SystemCoreClockUpdate();
 
     ENABLE_GPIO_CLOCK;
     GPIOC->MODER |= GPIO_MODER_MODER13_0;

@@ -20,6 +20,8 @@
  *
  *===========================================================================*/
 
+#define RCC_MAX_CYCLES          1000u
+
 /*===========================================================================*
  *
  * LOCAL TYPES AND ENUMERATION SECTION
@@ -55,7 +57,29 @@
  *===========================================================================*/
 void RCC_ClockInit(void)
 {
-    
+    uint32_t elapsedCycles = 0;
+
+    /* Turn HSE OSC On */
+    RCC->CR |= RCC_CR_HSEON;
+    /* Wait for HSE Ready flag */
+    while ((!RCC->CR & RCC_CR_HSERDY) || (elapsedCycles < RCC_MAX_CYCLES))
+    {
+        elapsedCycles++;
+    }
+
+    if (elapsedCycles >= RCC_MAX_CYCLES)
+    {
+        NVIC_SystemReset();
+    }
+    /* AHB prescaler = 1 => HCLK = 100[MHz] */
+    RCC->CFGR |= RCC_CFGR_HPRE_DIV1;
+    /* APB2 prescaler = 1 => APB2 = 100[MHz] */
+    RCC->CFGR |= RCC_CFGR_PPRE2_DIV1;
+    /* APB1 prescaler = 2 => APB1 = 50[MHz] */
+    RCC->CFGR |= RCC_CFGR_PPRE1_DIV2;
+
+
+
 }
 
 
