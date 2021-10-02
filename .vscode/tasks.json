@@ -45,7 +45,7 @@
         {
             "label": "Flash device",
             "type": "shell",
-            "command": "st-flash write ./build/ECU.bin 0x08000000",
+            "command": "make flash",
             "group": {
                 "kind": "build",
                 "isDefault": true
@@ -54,7 +54,7 @@
         {
             "label": "Erase device",
             "type": "shell",
-            "command": "st-flash erase",
+            "command": "make erase",
             "group": {
                 "kind": "build",
                 "isDefault": true

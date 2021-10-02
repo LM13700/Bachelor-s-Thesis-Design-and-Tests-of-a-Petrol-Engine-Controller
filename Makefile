@@ -16,7 +16,7 @@ RM := del /q
 
 
 #######################################
-# binaries
+# Sources
 #######################################
 # C sources
 C_SOURCES =  \
@@ -38,7 +38,7 @@ AS_INCLUDES =
 
 
 #######################################
-# binaries
+# Binaries
 #######################################
 PREFIX = arm-none-eabi-
 # The gcc compiler bin path can be either defined in make command via GCC_PATH variable (> make GCC_PATH=xxx)
@@ -130,7 +130,7 @@ all: $(BUILD_DIR)/$(TARGET).elf $(BUILD_DIR)/$(TARGET).hex $(BUILD_DIR)/$(TARGET
 
 
 #######################################
-# build the application
+# Build the application
 #######################################
 # list of objects
 OBJECTS = $(addprefix $(BUILD_DIR)/,$(notdir $(C_SOURCES:.c=.o)))
@@ -165,14 +165,25 @@ $(BUILD_DIR)/%.bin: $(BUILD_DIR)/%.elf | $(BUILD_DIR)
 
 
 #######################################
-# clean up
+# Clean up
 #######################################
 clean:
 	@echo Cleaning directory: $(BUILD_DIR)
 	$(NO_ECHO)$(RM) $(BUILD_DIR)\*
 
+#######################################
+# Flash
+#######################################
+flash: all
+	openocd -f interface/stlink.cfg -f target/stm32f4x.cfg -c "program $(BUILD_DIR)/$(TARGET).elf verify reset exit"
 
 #######################################
-# dependencies
+# Erase
+#######################################
+erase:
+	openocd -f interface/stlink.cfg -f target/stm32f4x.cfg -c "init; reset halt; flash erase_sector 0 0 last; exit"
+
+#######################################
+# Dependencies
 #######################################
 -include $(wildcard $(BUILD_DIR)/*.d)

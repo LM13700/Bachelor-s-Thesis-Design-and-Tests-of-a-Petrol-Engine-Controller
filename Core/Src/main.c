@@ -71,7 +71,7 @@ int main(void)
 
     while(1)
     {
-        Main_MsDelay(500u);
+        Main_MsDelay(10000u);
         LEDPORT->ODR ^= (1<<LED1);
     }
 }

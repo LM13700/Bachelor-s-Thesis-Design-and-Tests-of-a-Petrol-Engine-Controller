@@ -5,16 +5,19 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Cortex Debug (ST-Util)",
-            "servertype": "stutil",
-            "device": "STM32F411CEU6",
-            "type": "cortex-debug",
-            "v1": false,
+            "name": "Cortex Debug",
             "cwd": "${workspaceRoot}",
             "executable": "./build/ECU.elf",
             "request": "launch",
+            "type": "cortex-debug",
+            "servertype": "openocd",
+            "device": "STM32F411CEU6",
+            "configFiles": [
+                "interface/stlink.cfg",
+                "target/stm32f4x.cfg"
+            ],
             "svdFile": "${workspaceRoot}/STM32F411.svd",
-            "breakAfterReset": true
+            "breakAfterReset": false
         }
     ]
 }
