@@ -18,6 +18,7 @@
             "defines": [
                 "DEBUG",
                 "STM32F411xE",
+                "DSTM32F411xE",
                 "FLOAT_ABI_HARD",
                 "UNICODE",
                 "_UNICODE"

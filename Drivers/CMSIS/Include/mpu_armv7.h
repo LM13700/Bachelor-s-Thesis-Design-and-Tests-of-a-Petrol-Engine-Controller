@@ -104,7 +104,7 @@
   ((((DisableExec ) << MPU_RASR_XN_Pos) & MPU_RASR_XN_Msk)                                          | \
    (((AccessPermission) << MPU_RASR_AP_Pos) & MPU_RASR_AP_Msk)                                      | \
    (((AccessAttributes) ) & (MPU_RASR_TEX_Msk | MPU_RASR_S_Msk | MPU_RASR_C_Msk | MPU_RASR_B_Msk)))
-  
+
 /**
 * MPU Region Attribute and Size Register Value
 * 
@@ -181,7 +181,7 @@ typedef struct {
   uint32_t RBAR; //!< The region base address register value (RBAR)
   uint32_t RASR; //!< The region attribute and size register value (RASR) \ref MPU_RASR
 } ARM_MPU_Region_t;
-    
+
 /** Enable the MPU.
 * \param MPU_Control Default access permissions for unconfigured regions.
 */
@@ -230,7 +230,7 @@ __STATIC_INLINE void ARM_MPU_SetRegion(uint32_t rbar, uint32_t rasr)
 * \param rnr Region number to be configured.
 * \param rbar Value for RBAR register.
 * \param rsar Value for RSAR register.
-*/   
+*/
 __STATIC_INLINE void ARM_MPU_SetRegionEx(uint32_t rnr, uint32_t rbar, uint32_t rasr)
 {
   MPU->RNR = rnr;
