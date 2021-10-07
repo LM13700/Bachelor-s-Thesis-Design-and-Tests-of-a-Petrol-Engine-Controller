@@ -1,9 +1,9 @@
 /*===========================================================================*
- * File:        main.c
+ * File:        debug.c
  * Project:     ECU
- * Author:      Mateusz Mróz
- * Date:        06.09.2021
- * Brief:       Main.c
+ * Author:      Mateusz Mroz
+ * Date:        02.10.2021
+ * Brief:       Module containing tools for debug
  *===========================================================================*/
 
 /*===========================================================================*
@@ -12,8 +12,6 @@
  *
  *===========================================================================*/
 
-#include "main.h"
-
 #include "debug.h"
 
 /*===========================================================================*
@@ -21,10 +19,6 @@
  * DEFINES AND MACRO SECTION
  *
  *===========================================================================*/
-
-#define LEDPORT                 (GPIOC)
-#define LED1                    (13u)
-#define ENABLE_GPIO_CLOCK       (RCC->AHB1ENR |= RCC_AHB1ENR_GPIOCEN)
 
 /*===========================================================================*
  *
@@ -45,64 +39,43 @@
  *===========================================================================*/
 
 /*===========================================================================*
- * brief:       Function stopping MCU for given time
- * param[in]:   ms - time in ms
- * param[out]:  None
- * return:      None
- * details:     None
- *===========================================================================*/
-static void Main_MsDelay(uint32_t ms);
-
-/*===========================================================================*
  *
  * FUNCTION DEFINITION SECTION
  *
  *===========================================================================*/
 
 /*===========================================================================*
- * Function: main
+ * Function: Debug_SwoInit
  *===========================================================================*/
-int main(void)
+void Debug_SwoInit(void)
 {
-    SystemCoreClockUpdate();
+    /* Select the SWO interface */
+    DBGMCU->CR &= DBGMCU_CR_TRACE_MODE_Msk;
 
-    #if DEBUG
-    Debug_SwoInit();
-    #endif
-
-    ENABLE_GPIO_CLOCK;
-    GPIOC->MODER |= GPIO_MODER_MODER13_0;
-
-    while(1)
-    {
-        Main_MsDelay(10000u);
-        LEDPORT->ODR ^= (1<<LED1);
-    }
+    /* Enable the TRACE interface */
+    DBGMCU->CR |= DBGMCU_CR_TRACE_IOEN;
 }
 
+void SWO_Init(uint32_t portBits, uint32_t cpuCoreFreqHz)
+{
+    uint32_t SWOSpeed = 64000; /* default 64k baud rate */
+    uint32_t SWOPrescaler = (cpuCoreFreqHz / SWOSpeed) - 1; /* SWOSpeed in Hz, note that cpuCoreFreqHz is expected to be match the CPU core clock */
+
+    CoreDebug->DEMCR = CoreDebug_DEMCR_TRCENA_Msk; /* enable trace in core debug */
+    *((volatile unsigned *)(ITM_BASE + 0x400F0)) = 0x00000002; /* "Selected PIN Protocol Register": Select which protocol to use for trace output (2: SWO NRZ, 1: SWO Manchester encoding) */
+    *((volatile unsigned *)(ITM_BASE + 0x40010)) = SWOPrescaler; /* "Async Clock Prescaler Register". Scale the baud rate of the asynchronous output */
+    *((volatile unsigned *)(ITM_BASE + 0x00FB0)) = 0xC5ACCE55; /* ITM Lock Access Register, C5ACCE55 enables more write access to Control Register 0xE00 :: 0xFFC */
+    ITM->TCR = ITM_TCR_TraceBusID_Msk | ITM_TCR_SWOENA_Msk | ITM_TCR_SYNCENA_Msk | ITM_TCR_ITMENA_Msk; /* ITM Trace Control Register */
+    ITM->TPR = ITM_TPR_PRIVMASK_Msk; /* ITM Trace Privilege Register */
+    ITM->TER = portBits; /* ITM Trace Enable Register. Enabled tracing on stimulus ports. One bit per stimulus port. */
+    *((volatile unsigned *)(ITM_BASE + 0x01000)) = 0x400003FE; /* DWT_CTRL */
+    *((volatile unsigned *)(ITM_BASE + 0x40304)) = 0x00000100; /* Formatter and Flush Control Register */
+}
 /*===========================================================================*
  *
  * LOCAL FUNCTION DEFINITION SECTION
  *
  *===========================================================================*/
-
-/*===========================================================================*
- * Function: Main_MsDelay
- *===========================================================================*/
-static void Main_MsDelay(uint32_t ms)
-{
-    volatile uint32_t x;
-
-    while (ms-- > 0)
-    {
-        x = 500;
-
-        while (x-- > 0)
-        {
-            __NOP();
-        }
-    }
-}
 
 
 /* end of file */

@@ -1,12 +1,12 @@
 /*===========================================================================*
- * File:        rcc.h
+ * File:        debug.h
  * Project:     ECU
  * Author:      Mateusz Mroz
- * Date:        13.09.2021
- * Brief:       RCC - Reset and clock control registers
+ * Date:        02.10.2021
+ * Brief:       Module containing tools for debug
  *===========================================================================*/
-#ifndef _RCC_H_
-#define _RCC_H_
+#ifndef _DEBUG_H_
+#define _DEBUG_H_
 
 /*===========================================================================*
  *
@@ -41,13 +41,13 @@
  *===========================================================================*/
 
 /*===========================================================================*
- * brief:       Initialize system CLK
+ * brief:       Initialize SWO interface
  * param[in]:   None
  * param[out]:  None
  * return:      None
- * details:     Initialize external 25[MHz] HSE, max speed APBx and AHB clocks
+ * details:     None
  *===========================================================================*/
-void RCC_ClockInit(void);
+void Debug_SwoInit(void);
 
 #endif
 /* end of file */

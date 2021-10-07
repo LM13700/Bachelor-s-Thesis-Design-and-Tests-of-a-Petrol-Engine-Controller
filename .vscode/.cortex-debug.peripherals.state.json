@@ -1,1 +1,1 @@
-[{"node":"FPU","expanded":true,"format":0,"pinned":false},{"node":"FPU_CPACR","expanded":true,"format":0,"pinned":false},{"node":"RCC","expanded":true,"format":0,"pinned":false},{"node":"RCC.PLLCFGR","expanded":true,"format":0}]
+[{"node":"DBG","expanded":true,"format":0,"pinned":false}]
