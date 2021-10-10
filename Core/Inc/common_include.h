@@ -18,6 +18,7 @@
 
 #include "stdint.h"
 #include "stdbool.h"
+#include "utils.h"
 
 /*===========================================================================*
  *
@@ -30,6 +31,13 @@
  * EXPORTED TYPES AND ENUMERATION SECTION
  *
  *===========================================================================*/
+
+typedef enum Common_Result_Tag
+{
+    COMMON_OK,
+    COMMON_NOT_OK
+
+} Common_Result_T;
 
 /*===========================================================================*
  *

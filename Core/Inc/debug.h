@@ -49,5 +49,14 @@
  *===========================================================================*/
 void Debug_SwoInit(void);
 
+/*===========================================================================*
+ * brief:       SWO printf implementation
+ * param[in]:   Like in printf function
+ * param[out]:  None
+ * return:      None
+ * details:     Remember to initialize SWO module first
+ *===========================================================================*/
+void Debug_Print(char *,...);
+
 #endif
 /* end of file */

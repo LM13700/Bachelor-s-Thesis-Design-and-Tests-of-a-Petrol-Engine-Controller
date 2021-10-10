@@ -1,9 +1,9 @@
 /*===========================================================================*
- * File:        main.c
+ * File:        utils.c
  * Project:     ECU
- * Author:      Mateusz Mróz
- * Date:        06.09.2021
- * Brief:       Main.c
+ * Author:      Mateusz Mroz
+ * Date:        10.10.2021
+ * Brief:       Utils
  *===========================================================================*/
 
 /*===========================================================================*
@@ -12,19 +12,13 @@
  *
  *===========================================================================*/
 
-#include "main.h"
-
-#include "debug.h"
+#include "utils.h"
 
 /*===========================================================================*
  *
  * DEFINES AND MACRO SECTION
  *
  *===========================================================================*/
-
-#define LEDPORT                 (GPIOC)
-#define LED1                    (13u)
-#define ENABLE_GPIO_CLOCK       (RCC->AHB1ENR |= RCC_AHB1ENR_GPIOCEN)
 
 /*===========================================================================*
  *
@@ -45,37 +39,38 @@
  *===========================================================================*/
 
 /*===========================================================================*
- * brief:       Function stopping MCU for given time
- * param[in]:   ms - time in ms
- * param[out]:  None
- * return:      None
- * details:     None
- *===========================================================================*/
-static void Main_MsDelay(uint32_t ms);
-
-/*===========================================================================*
  *
  * FUNCTION DEFINITION SECTION
  *
  *===========================================================================*/
 
 /*===========================================================================*
- * Function: main
+ * brief:       Converts number to string with corresponding number base
+ * param[in]:   number - number to convert
+ * param[in]:   base - number base
+ * param[in]:   buffer - a pointer to the memory, where string will be stored
+ * param
+ * param[out]:  None
+ * return:      pointer to the converted 
+ * details:     
  *===========================================================================*/
-int main(void)
+
+char* Utils_Itoa(unsigned int num, int base)
 {
-    SystemCoreClockUpdate();
+    static char Representation[]= "0123456789ABCDEF";
+    static char buffer[50];
+    char *ptr;
 
-    Debug_SwoInit();
+    ptr = &buffer[49];
+    *ptr = '\0';
 
-    ENABLE_GPIO_CLOCK;
-    GPIOC->MODER |= GPIO_MODER_MODER13_0;
-
-    while(1)
+    do
     {
-        Main_MsDelay(1000u);
-        LEDPORT->ODR ^= (1<<LED1);
-    }
+        *--ptr = Representation[num%base];
+        num /= base;
+    } while(num != 0);
+
+    return(ptr);
 }
 
 /*===========================================================================*
@@ -83,24 +78,6 @@ int main(void)
  * LOCAL FUNCTION DEFINITION SECTION
  *
  *===========================================================================*/
-
-/*===========================================================================*
- * Function: Main_MsDelay
- *===========================================================================*/
-static void Main_MsDelay(uint32_t ms)
-{
-    volatile uint32_t x;
-
-    while (ms-- > 0)
-    {
-        x = 500;
-
-        while (x-- > 0)
-        {
-            __NOP();
-        }
-    }
-}
 
 
 /* end of file */

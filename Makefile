@@ -22,6 +22,7 @@ RM := del /q
 C_SOURCES =  \
 Core/Src/system_stm32f4xx.c \
 Core/Src/main.c \
+Core/Src/utils.c \
 Core/Src/debug.c \
 
 # C includes
