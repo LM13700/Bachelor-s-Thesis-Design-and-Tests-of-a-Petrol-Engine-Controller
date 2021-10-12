@@ -16,8 +16,8 @@
 
 #include "stm32f411xe.h"
 
-#include "stdint.h"
 #include "stdbool.h"
+#include "stdint.h"
 #include "utils.h"
 
 /*===========================================================================*

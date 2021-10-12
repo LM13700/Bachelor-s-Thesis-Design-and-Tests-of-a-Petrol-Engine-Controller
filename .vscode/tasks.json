@@ -28,7 +28,7 @@
             }
         },
         {
-            "label": "Reuild Release",
+            "label": "Rebuild Release",
             "type": "shell",
             "dependsOrder": "sequence",
             "dependsOn": ["Clean", "Build Release"]

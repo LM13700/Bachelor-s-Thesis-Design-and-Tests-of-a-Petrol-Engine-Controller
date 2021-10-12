@@ -16,6 +16,8 @@
 
 #include "debug.h"
 
+Debug_DefineModuleTag(MAIN);
+
 /*===========================================================================*
  *
  * DEFINES AND MACRO SECTION

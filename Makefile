@@ -106,7 +106,7 @@ ASFLAGS += $(MCU) $(AS_DEFS) $(AS_INCLUDES) $(OPT) $(WFLAGS) -fdata-sections -ff
 CFLAGS += $(MCU) $(C_DEFS) $(C_INCLUDES) $(OPT) $(WFLAGS) -fdata-sections -ffunction-sections -std=c99
 
 ifeq ($(DEBUG), 1)
-CFLAGS += -g -gdwarf-2 -DDEBUG
+CFLAGS += -g3 -gdwarf-2 -DDEBUG
 OPT += -Og
 else
 OPT += -O2

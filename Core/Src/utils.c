@@ -20,6 +20,8 @@
  *
  *===========================================================================*/
 
+#define UTILS_32BIT_NUMBER_STRING_MAX_LEN           (33u)
+
 /*===========================================================================*
  *
  * LOCAL TYPES AND ENUMERATION SECTION
@@ -45,32 +47,24 @@
  *===========================================================================*/
 
 /*===========================================================================*
- * brief:       Converts number to string with corresponding number base
- * param[in]:   number - number to convert
- * param[in]:   base - number base
- * param[in]:   buffer - a pointer to the memory, where string will be stored
- * param
- * param[out]:  None
- * return:      pointer to the converted 
- * details:     
+ * Function: Utils_Itoa
  *===========================================================================*/
-
-char* Utils_Itoa(unsigned int num, int base)
+char* Utils_Itoa(unsigned int number, unsigned int base)
 {
-    static char Representation[]= "0123456789ABCDEF";
-    static char buffer[50];
+    char symbols[]= "0123456789ABCDEF";
+    char buffer[UTILS_32BIT_NUMBER_STRING_MAX_LEN];
     char *ptr;
 
-    ptr = &buffer[49];
+    ptr = &buffer[(UTILS_32BIT_NUMBER_STRING_MAX_LEN - 1u)];
     *ptr = '\0';
 
     do
     {
-        *--ptr = Representation[num%base];
-        num /= base;
-    } while(num != 0);
+        *--ptr = symbols[number % base];
+        number /= base;
+    } while (number != 0);
 
-    return(ptr);
+    return (ptr);
 }
 
 /*===========================================================================*

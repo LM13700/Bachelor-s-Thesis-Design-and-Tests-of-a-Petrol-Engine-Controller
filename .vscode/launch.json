@@ -5,10 +5,40 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Cortex Debug",
+            "name": "Debug launch",
             "cwd": "${workspaceRoot}",
             "executable": "./build/ECU.elf",
             "request": "launch",
+            "type": "cortex-debug",
+            "servertype": "openocd",
+            "device": "STM32F411CEU6",
+            "configFiles": [
+                "interface/stlink.cfg",
+                "target/stm32f4x.cfg"
+            ],
+            "svdFile": "${workspaceRoot}/STM32F411.svd",
+            "breakAfterReset": false,
+            "swoConfig":{
+                "enabled":true,
+                "source":"probe",
+                "swoFrequency": 2000000,
+                "cpuFrequency": 100000000,
+                "decoders": [
+                    {
+                        "port": 0,
+                        "type": "console",
+                        "showOnStartup": true,
+                        "label": "SWO output",
+                        "encoding":"ascii"
+                    }
+                ]
+            }
+        },
+        {
+            "name": "Debug attach",
+            "cwd": "${workspaceRoot}",
+            "executable": "./build/ECU.elf",
+            "request": "attach",
             "type": "cortex-debug",
             "servertype": "openocd",
             "device": "STM32F411CEU6",

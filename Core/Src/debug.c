@@ -14,10 +14,7 @@
 
 #include "debug.h"
 
-#include <stdio.h>
-#include <stdarg.h>
-
-char* convert(unsigned int, int);       //Convert integer number into octal, hex, etc.
+#include "stdarg.h"
 
 /*===========================================================================*
  *
@@ -47,7 +44,7 @@ char* convert(unsigned int, int);       //Convert integer number into octal, hex
 
 /*===========================================================================*
  * brief:       SWO puts implementation
- * param[in]:   const char* - a pointer to the string
+ * param[in]:   string - a pointer to the input string
  * param[out]:  None
  * return:      None
  * details:     None
@@ -55,13 +52,14 @@ char* convert(unsigned int, int);       //Convert integer number into octal, hex
 static void Debug_PutS(const char* string);
 
 /*===========================================================================*
- * brief:       
- * param[in]:   
- * param[out]:  
- * return:      
- * details:     
+ * brief:       Internal print function - vprintf alike
+ * param[in]:   format - a string to be written to output
+ * param[in]:   args - a variable arguments list
+ * param[out]:  None
+ * return:      None
+ * details:     va_end is called at the end of the function
  *===========================================================================*/
-char* convert(unsigned int num, int base);
+static void _InternalPrint(char* const format, va_list args);
 
 /*===========================================================================*
  *
@@ -92,55 +90,27 @@ void Debug_Print(char* format, ...)
 {
 #ifdef DEBUG
 
-    char *traverse;
-    int32_t index;
-    char *s; 
+    va_list args;
+    va_start(args, format);
 
-    va_list arg;
-    va_start(arg, format);
+    _InternalPrint(format, args);
 
-    for (traverse = format; *traverse != '\0'; traverse++)
-    {
-        while (*traverse != '%')
-        { 
-            Debug_PutChar(*traverse);
-            traverse++; 
-        } 
+#endif
+}
 
-        traverse++; 
+/*===========================================================================*
+ * Function: Debug_PrintLogInternal
+ *===========================================================================*/
+void Debug_PrintLogInternal(const char* moduleTag, const int codeLine, char* format, ...)
+{
+#ifdef DEBUG
 
-        //Module 2: Fetching and executing arguments
-        switch(*traverse) 
-        {
-            case 'c' : index = va_arg(arg,int);     //Fetch char argument
-                        Debug_PutChar(index);
-                        break;
+    va_list args;
+    va_start(args, format);
 
-            case 'd' : index = va_arg(arg,int);         //Fetch Decimal/Integer argument
-                        if(index < 0)
-                        {
-                            index = -index;
-                            Debug_PutChar('-');
-                        }
-                        Debug_PutS(ITOA(index, 10));
-                        break;
+    Debug_Print("%s %d: ", moduleTag, codeLine);
 
-            case 'o': index = va_arg(arg,unsigned int); //Fetch Octal representation
-                        Debug_PutS(convert(index, 8));
-                        break;
-
-            case 's': s = va_arg(arg,char *);       //Fetch string
-                        Debug_PutS(s);
-                        break;
-
-            case 'x': index = va_arg(arg,unsigned int); //Fetch Hexadecimal representation
-                        Debug_PutS(convert(index, 16));
-                        break;
-        }
-    }
-
-    //Module 3: Closing argument list to necessary clean-up
-    va_end(arg);
+    _InternalPrint(format, args);
 
 #endif
 }
@@ -156,7 +126,7 @@ void Debug_Print(char* format, ...)
  *===========================================================================*/
 static void Debug_PutS(const char* string)
 {
-    int index = 0;
+    unsigned int index = 0;
 
     while (string[index])
     {
@@ -164,26 +134,79 @@ static void Debug_PutS(const char* string)
 
         index++;
     }
-
-    Debug_PutChar('\n');
 }
 
-char* convert(unsigned int num, int base)
+/*===========================================================================*
+ * Function: _InternalPrint
+ *===========================================================================*/
+static void _InternalPrint(char* const format, va_list args)
 {
-    static char Representation[]= "0123456789ABCDEF";
-    static char buffer[50];
-    char *ptr;
+    char* inputCh;
+    int32_t value;
 
-    ptr = &buffer[49];
-    *ptr = '\0';
+    inputCh = format;
 
     do
     {
-        *--ptr = Representation[num%base];
-        num /= base;
-    } while(num != 0);
+        if (*inputCh != '%')
+        {
+            Debug_PutChar(*inputCh);
+        }
+        else
+        {
+            inputCh++;
 
-    return(ptr);
+            switch(*inputCh)
+            {
+                /* Decimal */
+                case 'd':
+                {
+                    value = va_arg(args, int);
+
+                    if (value < 0)
+                    {
+                        value *= -1;
+                        Debug_PutChar('-');
+                    }
+                    Debug_PutS(ITOA(value, 10));
+                    break;
+                }
+
+                /* Hexadecimal */
+                case 'x':
+                {
+                    value = va_arg(args, unsigned int);
+                    Debug_PutS(ITOA(value, 16));
+                    break;
+                }
+
+                /* Char */
+                case 'c':
+                {
+                    value = va_arg(args, int);
+                    Debug_PutChar(value);
+                    break;
+                }
+
+                /* String */
+                case 's':
+                {
+                    Debug_PutS((char*)va_arg(args, int));
+                    break;
+                }
+
+                default:
+                {
+                    break;
+                }
+            }
+        }
+
+        inputCh++;
+
+    } while (*inputCh != '\0');
+
+    va_end(args);
 }
 
 

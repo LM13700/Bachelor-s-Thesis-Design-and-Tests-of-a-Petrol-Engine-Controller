@@ -22,6 +22,12 @@
  *
  *===========================================================================*/
 
+#define Debug_DefineModuleTag(_TAG_)    static const char module_tag[] = #_TAG_
+
+#ifdef __GNUC__
+    #define Debug_PrintLog(...)         Debug_PrintLogInternal(module_tag, __LINE__, __VA_ARGS__)
+#endif
+
 /*===========================================================================*
  *
  * EXPORTED TYPES AND ENUMERATION SECTION
@@ -50,13 +56,27 @@
 void Debug_SwoInit(void);
 
 /*===========================================================================*
- * brief:       SWO printf implementation
- * param[in]:   Like in printf function
+ * brief:       SWO printf alike implementation
+ * param[in]:   format - a string to be written to output
+ * param[in]:   ... - additional agruments
  * param[out]:  None
  * return:      None
- * details:     Remember to initialize SWO module first
+ * details:     None
  *===========================================================================*/
-void Debug_Print(char *,...);
+void Debug_Print(char* format, ...);
+
+/*===========================================================================*
+ * brief:       SWO printf wrapper allowing logging the calling module name and line num
+ * param[in]:   moduleTag - a string containing module name
+ * param[in]:   codeLine - the calling module line number
+ * param[in]:   format - a string to be written to output
+ * param[in]:   ... - additional agruments
+ * param[out]:  None
+ * return:      None
+ * details:     It is recommended to use this function only via macro Debug_PrintLog
+ *===========================================================================*/
+void Debug_PrintLogInternal(const char* moduleTag, const int codeLine, char* format, ...);
+
 
 #endif
 /* end of file */
