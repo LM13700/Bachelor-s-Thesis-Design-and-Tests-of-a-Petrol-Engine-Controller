@@ -22,7 +22,7 @@
  *
  *===========================================================================*/
 
-#define Debug_DefineModuleTag(_TAG_)    static const char module_tag[] = #_TAG_
+#define Debug_DefineModuleTag(_TAG_)    static const char module_tag[] __attribute__((used)) = #_TAG_
 
 #ifdef __GNUC__
     #define Debug_PrintLog(...)         Debug_PrintLogInternal(module_tag, __LINE__, __VA_ARGS__)
