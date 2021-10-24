@@ -14,9 +14,9 @@
 
 #include "main.h"
 
-#include "debug.h"
+#include "swo.h"
 
-Debug_DefineModuleTag(MAIN);
+SWO_DefineModuleTag(MAIN);
 
 /*===========================================================================*
  *
@@ -66,17 +66,13 @@ static void Main_MsDelay(uint32_t ms);
  *===========================================================================*/
 int main(void)
 {
-    SystemCoreClockUpdate();
-
-    Debug_SwoInit();
-
-    ENABLE_GPIO_CLOCK;
-    GPIOC->MODER |= GPIO_MODER_MODER13_0;
+    SWO_Init();
 
     while(1)
     {
+        SWO_Print("Hello world from SWO %d \n", 1u);
+        SWO_PrintLog("Hello world from SWO %d \n", 2u);
         Main_MsDelay(1000u);
-        LEDPORT->ODR ^= (1<<LED1);
     }
 }
 

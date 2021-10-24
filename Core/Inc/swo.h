@@ -1,12 +1,12 @@
 /*===========================================================================*
- * File:        debug.h
+ * File:        swo.h
  * Project:     ECU
  * Author:      Mateusz Mroz
  * Date:        02.10.2021
- * Brief:       Module containing tools for debug
+ * Brief:       SWO module
  *===========================================================================*/
-#ifndef _DEBUG_H_
-#define _DEBUG_H_
+#ifndef _SWO_H_
+#define _SWO_H_
 
 /*===========================================================================*
  *
@@ -22,10 +22,10 @@
  *
  *===========================================================================*/
 
-#define Debug_DefineModuleTag(_TAG_)    static const char module_tag[] __attribute__((used)) = #_TAG_
+#define SWO_DefineModuleTag(_TAG_)    static const char module_tag[] __attribute__((used)) = #_TAG_
 
 #ifdef __GNUC__
-    #define Debug_PrintLog(...)         Debug_PrintLogInternal(module_tag, __LINE__, __VA_ARGS__)
+    #define SWO_PrintLog(...)         SWO_PrintLogInternal(module_tag, __LINE__, __VA_ARGS__)
 #endif
 
 /*===========================================================================*
@@ -53,7 +53,7 @@
  * return:      None
  * details:     None
  *===========================================================================*/
-void Debug_SwoInit(void);
+void SWO_Init(void);
 
 /*===========================================================================*
  * brief:       SWO printf alike implementation
@@ -63,7 +63,7 @@ void Debug_SwoInit(void);
  * return:      None
  * details:     None
  *===========================================================================*/
-void Debug_Print(char* format, ...);
+void SWO_Print(char* format, ...);
 
 /*===========================================================================*
  * brief:       SWO printf wrapper allowing logging the calling module name and line num
@@ -75,7 +75,7 @@ void Debug_Print(char* format, ...);
  * return:      None
  * details:     It is recommended to use this function only via macro Debug_PrintLog
  *===========================================================================*/
-void Debug_PrintLogInternal(const char* moduleTag, const int codeLine, char* format, ...);
+void SWO_PrintLogInternal(const char* moduleTag, const int codeLine, char* format, ...);
 
 
 #endif

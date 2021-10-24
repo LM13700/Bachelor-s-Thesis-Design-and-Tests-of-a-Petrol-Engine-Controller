@@ -1,9 +1,9 @@
 /*===========================================================================*
- * File:        debug.c
+ * File:        swo.c
  * Project:     ECU
  * Author:      Mateusz Mroz
  * Date:        02.10.2021
- * Brief:       Module containing tools for debug
+ * Brief:       SWO module
  *===========================================================================*/
 
 /*===========================================================================*
@@ -12,7 +12,7 @@
  *
  *===========================================================================*/
 
-#include "debug.h"
+#include "swo.h"
 
 #include "stdarg.h"
 
@@ -22,7 +22,7 @@
  *
  *===========================================================================*/
 
-#define Debug_PutChar(_CHAR_)         ITM_SendChar(_CHAR_)
+#define SWO_PutChar(_CHAR_)         ITM_SendChar(_CHAR_)
 
 /*===========================================================================*
  *
@@ -49,7 +49,7 @@
  * return:      None
  * details:     None
  *===========================================================================*/
-static void Debug_PutS(const char* string);
+static void SWO_PutS(const char* string);
 
 /*===========================================================================*
  * brief:       Internal print function - vprintf alike
@@ -59,7 +59,7 @@ static void Debug_PutS(const char* string);
  * return:      None
  * details:     va_end is called at the end of the function
  *===========================================================================*/
-static void _InternalPrint(char* const format, va_list args);
+static void SWO_InternalPrint(char* const format, va_list args);
 
 /*===========================================================================*
  *
@@ -68,9 +68,9 @@ static void _InternalPrint(char* const format, va_list args);
  *===========================================================================*/
 
 /*===========================================================================*
- * Function: Debug_SwoInit
+ * Function: SWO_Init
  *===========================================================================*/
-void Debug_SwoInit(void)
+void SWO_Init(void)
 {
 #ifdef DEBUG
 
@@ -84,33 +84,33 @@ void Debug_SwoInit(void)
 }
 
 /*===========================================================================*
- * Function: Debug_Print
+ * Function: SWO_Print
  *===========================================================================*/
-void Debug_Print(char* format, ...)
+void SWO_Print(char* format, ...)
 {
 #ifdef DEBUG
 
     va_list args;
     va_start(args, format);
 
-    _InternalPrint(format, args);
+    SWO_InternalPrint(format, args);
 
 #endif
 }
 
 /*===========================================================================*
- * Function: Debug_PrintLogInternal
+ * Function: SWO_PrintLogInternal
  *===========================================================================*/
-void Debug_PrintLogInternal(const char* moduleTag, const int codeLine, char* format, ...)
+void SWO_PrintLogInternal(const char* moduleTag, const int codeLine, char* format, ...)
 {
 #ifdef DEBUG
 
     va_list args;
     va_start(args, format);
 
-    Debug_Print("%s %d: ", moduleTag, codeLine);
+    SWO_Print("%s %d: ", moduleTag, codeLine);
 
-    _InternalPrint(format, args);
+    SWO_InternalPrint(format, args);
 
 #endif
 }
@@ -122,24 +122,24 @@ void Debug_PrintLogInternal(const char* moduleTag, const int codeLine, char* for
  *===========================================================================*/
 
 /*===========================================================================*
- * Function: Debug_PutS
+ * Function: SWO_PutS
  *===========================================================================*/
-static void Debug_PutS(const char* string)
+static void SWO_PutS(const char* string)
 {
     unsigned int index = 0;
 
     while (string[index])
     {
-        Debug_PutChar(string[index]);
+        SWO_PutChar(string[index]);
 
         index++;
     }
 }
 
 /*===========================================================================*
- * Function: _InternalPrint
+ * Function: SWO_InternalPrint
  *===========================================================================*/
-static void _InternalPrint(char* const format, va_list args)
+static void SWO_InternalPrint(char* const format, va_list args)
 {
     char* inputCh;
     int32_t value;
@@ -150,7 +150,7 @@ static void _InternalPrint(char* const format, va_list args)
     {
         if (*inputCh != '%')
         {
-            Debug_PutChar(*inputCh);
+            SWO_PutChar(*inputCh);
         }
         else
         {
@@ -166,9 +166,9 @@ static void _InternalPrint(char* const format, va_list args)
                     if (value < 0)
                     {
                         value *= -1;
-                        Debug_PutChar('-');
+                        SWO_PutChar('-');
                     }
-                    Debug_PutS(ITOA(value, 10));
+                    SWO_PutS(ITOA(value, 10));
                     break;
                 }
 
@@ -176,7 +176,7 @@ static void _InternalPrint(char* const format, va_list args)
                 case 'x':
                 {
                     value = va_arg(args, unsigned int);
-                    Debug_PutS(ITOA(value, 16));
+                    SWO_PutS(ITOA(value, 16));
                     break;
                 }
 
@@ -184,14 +184,14 @@ static void _InternalPrint(char* const format, va_list args)
                 case 'c':
                 {
                     value = va_arg(args, int);
-                    Debug_PutChar(value);
+                    SWO_PutChar(value);
                     break;
                 }
 
                 /* String */
                 case 's':
                 {
-                    Debug_PutS((char*)va_arg(args, int));
+                    SWO_PutS((char*)va_arg(args, int));
                     break;
                 }
 
