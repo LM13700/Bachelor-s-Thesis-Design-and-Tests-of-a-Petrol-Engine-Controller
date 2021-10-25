@@ -63,7 +63,7 @@ void SWO_Init(void);
  * return:      None
  * details:     None
  *===========================================================================*/
-void SWO_Print(char* format, ...);
+void SWO_Print(char* format, ...) __attribute__ ((__format__(printf, 1, 2)));
 
 /*===========================================================================*
  * brief:       SWO printf wrapper allowing logging the calling module name and line num
@@ -75,7 +75,8 @@ void SWO_Print(char* format, ...);
  * return:      None
  * details:     It is recommended to use this function only via macro Debug_PrintLog
  *===========================================================================*/
-void SWO_PrintLogInternal(const char* moduleTag, const int codeLine, char* format, ...);
+void SWO_PrintLogInternal(const char* moduleTag, const int codeLine, char* format, ...)
+                          __attribute__ ((__format__(printf, 3, 4)));
 
 
 #endif
