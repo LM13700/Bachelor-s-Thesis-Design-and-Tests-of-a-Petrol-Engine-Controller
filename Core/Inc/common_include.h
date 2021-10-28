@@ -1,12 +1,12 @@
 /*===========================================================================*
- * File:        main.h
+ * File:        common_include.h
  * Project:     ECU
  * Author:      Mateusz Mroz
- * Date:        06.09.2021
- * Brief:       Main.h
+ * Date:        13.09.2021
+ * Brief:       Common include
  *===========================================================================*/
-#ifndef _MAIN_H_
-#define _MAIN_H_
+#ifndef _COMMON_INCLUDE_H_
+#define _COMMON_INCLUDE_H_
 
 /*===========================================================================*
  *
@@ -14,7 +14,11 @@
  *
  *===========================================================================*/
 
-#include "common_include.h"
+#include "stm32f411xe.h"
+
+#include "stdbool.h"
+#include "stdint.h"
+#include "utils.h"
 
 /*===========================================================================*
  *
@@ -22,11 +26,21 @@
  *
  *===========================================================================*/
 
+#define EXTI_GetPendingTrigger(_TRIGGER_)           (EXTI->PR & _TRIGGER_)
+#define EXTI_ClearPendingTrigger(_TRIGGER_)         (EXTI->PR |= _TRIGGER_)
+
 /*===========================================================================*
  *
  * EXPORTED TYPES AND ENUMERATION SECTION
  *
  *===========================================================================*/
+
+typedef enum Common_Result_Tag
+{
+    COMMON_OK,
+    COMMON_NOT_OK
+
+} Common_Result_T;
 
 /*===========================================================================*
  *
@@ -39,7 +53,6 @@
  * EXPORTED FUNCTION DECLARATION SECTION
  *
  *===========================================================================*/
-
 
 #endif
 /* end of file */

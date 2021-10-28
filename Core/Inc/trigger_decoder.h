@@ -1,12 +1,12 @@
 /*===========================================================================*
- * File:        main.h
+ * File:        trigger_decoder.h
  * Project:     ECU
  * Author:      Mateusz Mroz
- * Date:        06.09.2021
- * Brief:       Main.h
+ * Date:        24.10.2021
+ * Brief:       Trigger decoder
  *===========================================================================*/
-#ifndef _MAIN_H_
-#define _MAIN_H_
+#ifndef _TRIGGER_DECODER_H_
+#define _TRIGGER_DECODER_H_
 
 /*===========================================================================*
  *
@@ -40,6 +40,14 @@
  *
  *===========================================================================*/
 
+/*===========================================================================*
+ * brief:       Initialize trigger decode module
+ * param[in]:   None
+ * param[out]:  None
+ * return:      None
+ * details:     None
+ *===========================================================================*/
+void TRIGD_Init(void);
 
 #endif
 /* end of file */

@@ -1,9 +1,9 @@
 /*===========================================================================*
- * File:        main.c
+ * File:        trigger_decoder.c
  * Project:     ECU
- * Author:      Mateusz Mróz
- * Date:        06.09.2021
- * Brief:       Main.c
+ * Author:      Mateusz Mroz
+ * Date:        24.10.2021
+ * Brief:       Trigger decoder
  *===========================================================================*/
 
 /*===========================================================================*
@@ -12,12 +12,9 @@
  *
  *===========================================================================*/
 
-#include "main.h"
-
-#include "swo.h"
 #include "trigger_decoder.h"
 
-SWO_DefineModuleTag(MAIN);
+#include "pins_assignment.h"
 
 /*===========================================================================*
  *
@@ -37,6 +34,8 @@ SWO_DefineModuleTag(MAIN);
  *
  *===========================================================================*/
 
+static volatile uint32_t trigd_count;
+
 /*===========================================================================*
  *
  * LOCAL FUNCTION DECLARATION SECTION
@@ -44,13 +43,17 @@ SWO_DefineModuleTag(MAIN);
  *===========================================================================*/
 
 /*===========================================================================*
- * brief:       Function calling initializing functions
- * param[in]:   None
- * param[out]:  None
- * return:      None
- * details:     None
+ * brief:       EXTI0
+ * param[in]:   
+ * param[out]:  
+ * return:      
+ * details:     
  *===========================================================================*/
-void MAIN_CallInits(void);
+extern void EXTI0_IRQHandler(void);
+void EXTI0_IRQHandler(void)
+{
+    trigd_count++;
+}
 
 /*===========================================================================*
  *
@@ -59,16 +62,29 @@ void MAIN_CallInits(void);
  *===========================================================================*/
 
 /*===========================================================================*
- * Function: main
+ * Function: TRIGD_Init
  *===========================================================================*/
-int main(void)
+void TRIGD_Init()
 {
-    MAIN_CallInits();
+    /* Enable GPIOA clock */
+    RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN;
+    /* Set GPIOA port 0 as input */
+    GPIOA->MODER |= GPIO_MODER_MODER0;
+    /* Enable pull-up for GPIOA port 0 */
+    GPIOA->PUPDR |= GPIO_PUPDR_PUPD0_0;
 
-    while(1)
-    {
-        __WFE();
-    }
+    /* Connect PA0 pin to the EXTI0 interrupt */
+    SYSCFG->EXTICR[0] &= ~SYSCFG_EXTICR1_EXTI0;
+    /* Don't mask EXTI0 interrupt */
+    EXTI->IMR |= EXTI_IMR_IM0;
+    /* Disable rising edge trigger */
+    EXTI->RTSR &= ~EXTI_RTSR_TR0;
+    /* Enble falling edge trigger */
+    EXTI->FTSR |= EXTI_FTSR_TR0;
+
+    EXTI_ClearPendingTrigger(EXTI_PR_PR0);
+    NVIC_ClearPendingIRQ(EXTI0_IRQn);
+    NVIC_EnableIRQ(EXTI0_IRQn);
 }
 
 /*===========================================================================*
@@ -76,15 +92,6 @@ int main(void)
  * LOCAL FUNCTION DEFINITION SECTION
  *
  *===========================================================================*/
-
-/*===========================================================================*
- * Function: MAIN_CallInits
- *===========================================================================*/
-void MAIN_CallInits(void)
-{
-    SWO_Init();
-    TRIGD_Init();
-}
 
 
 /* end of file */

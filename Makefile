@@ -1,38 +1,47 @@
-######################################
-# target
-######################################
-TARGET = ECU
+TARGET := ECU
+BUILD_DIR := build
 
-
-######################################
-# building variables
-######################################
-# debug build?
 DEBUG = 1
-RM := rm -rf
+VERBOSE := 0
+
+# Echo suspend
+ifeq ($(VERBOSE),1)
+  NO_ECHO :=
+else
+  NO_ECHO := @
+endif
+
+MK := mkdir
+RM := del /q
 
 
 #######################################
-# paths
+# Sources
 #######################################
-# Build path
-BUILD_DIR = build
-
-######################################
-# source
-######################################
 # C sources
 C_SOURCES =  \
 Core/Src/system_stm32f4xx.c \
-Core/Src/main.c
+Core/Src/main.c \
+Core/Src/swo.c \
+Core/Src/trigger_decoder.c \
+Core/Src/utils.c \
+
+# C includes
+C_INCLUDES = \
+-ICore/Inc \
+-IDrivers/CMSIS/Device/ST/STM32F4xx/Include \
+-IDrivers/CMSIS/Include
 
 # ASM sources
 ASM_SOURCES =  \
 startup_stm32f411xe.s
 
+# AS includes
+AS_INCLUDES = 
+
 
 #######################################
-# binaries
+# Binaries
 #######################################
 PREFIX = arm-none-eabi-
 # The gcc compiler bin path can be either defined in make command via GCC_PATH variable (> make GCC_PATH=xxx)
@@ -50,48 +59,55 @@ SZ = $(PREFIX)size
 endif
 HEX = $(CP) -O ihex
 BIN = $(CP) -O binary -S
- 
+
+
 #######################################
 # CFLAGS
 #######################################
 # cpu
-CPU = -mcpu=cortex-m4
+CPU := -mcpu=cortex-m4
 
 # fpu
-FPU = -mfpu=fpv4-sp-d16
+FPU := -mfpu=fpv4-sp-d16
 
 # float-abi
-FLOAT-ABI = -mfloat-abi=hard
+FLOAT-ABI := -mfloat-abi=hard
 
 # mcu
-MCU = $(CPU) -mthumb $(FPU) $(FLOAT-ABI)
+MCU := $(CPU) -mthumb $(FPU) $(FLOAT-ABI)
 
 # macros for gcc
 # AS defines
-AS_DEFS = 
+AS_DEFS :=
 
 # C defines
-C_DEFS = \
+C_DEFS := \
 -DSTM32F411xE
 
-
-# AS includes
-AS_INCLUDES = 
-
-# C includes
-C_INCLUDES = \
--ICore/Inc \
--IDrivers/CMSIS/Device/ST/STM32F4xx/Include \
--IDrivers/CMSIS/Include
+# Warning flags
+WFLAGS += -Wall
+WFLAGS += -Wextra
+WFLAGS += -Wduplicated-branches
+WFLAGS += -Wduplicated-cond
+WFLAGS += -Wlogical-op
+#CFLAGS += -Wmissing-declarations
+WFLAGS += -Wmissing-prototypes
+WFLAGS += -Wno-expansion-to-defined
+WFLAGS += -Wno-unused-parameter
+WFLAGS += -Wno-enum-conversion
+WFLAGS += -Wpedantic
+WFLAGS += -Wshadow
+WFLAGS += -Wstack-usage=256
+WFLAGS += -Wuninitialized
+WFLAGS += -Wunsafe-loop-optimizations
 
 # compile gcc flags
-ASFLAGS += $(MCU) $(AS_DEFS) $(AS_INCLUDES) $(OPT) -Wall -fdata-sections -ffunction-sections
+ASFLAGS += $(MCU) $(AS_DEFS) $(AS_INCLUDES) $(OPT) $(WFLAGS) -fdata-sections -ffunction-sections
 
-CFLAGS += $(MCU) $(C_DEFS) $(C_INCLUDES) $(OPT) -Wall -fdata-sections -ffunction-sections
-
+CFLAGS += $(MCU) $(C_DEFS) $(C_INCLUDES) $(OPT) $(WFLAGS) -fdata-sections -ffunction-sections -std=c99
 
 ifeq ($(DEBUG), 1)
-CFLAGS += -g -gdwarf-2 -DDEBUG
+CFLAGS += -g3 -gdwarf-2 -DDEBUG
 OPT += -Og
 else
 OPT += -O2
@@ -117,7 +133,7 @@ all: $(BUILD_DIR)/$(TARGET).elf $(BUILD_DIR)/$(TARGET).hex $(BUILD_DIR)/$(TARGET
 
 
 #######################################
-# build the application
+# Build the application
 #######################################
 # list of objects
 OBJECTS = $(addprefix $(BUILD_DIR)/,$(notdir $(C_SOURCES:.c=.o)))
@@ -126,34 +142,51 @@ vpath %.c $(sort $(dir $(C_SOURCES)))
 OBJECTS += $(addprefix $(BUILD_DIR)/,$(notdir $(ASM_SOURCES:.s=.o)))
 vpath %.s $(sort $(dir $(ASM_SOURCES)))
 
+$(BUILD_DIR):
+	$(NO_ECHO)$(MK) $@
+
 $(BUILD_DIR)/%.o: %.c Makefile | $(BUILD_DIR) 
-	$(CC) -c $(CFLAGS) -Wa,-a,-ad,-alms=$(BUILD_DIR)/$(notdir $(<:.c=.lst)) $< -o $@
+	@echo Compiling file: $@
+	$(NO_ECHO)$(CC) -c $(CFLAGS) -Wa,-a,-ad,-alms=$(BUILD_DIR)/$(notdir $(<:.c=.lst)) $< -o $@
 
 $(BUILD_DIR)/%.o: %.s Makefile | $(BUILD_DIR)
-	$(AS) -c $(CFLAGS) $< -o $@
+	@echo Assembling file: $@
+	$(NO_ECHO)$(AS) -c $(CFLAGS) $< -o $@
 
 $(BUILD_DIR)/$(TARGET).elf: $(OBJECTS) Makefile
-	$(CC) $(OBJECTS) $(LDFLAGS) -o $@
-	$(SZ) $@
+	@echo Linking target: $@
+	$(NO_ECHO)$(CC) $(OBJECTS) $(LDFLAGS) -o $@
+	$(NO_ECHO)$(SZ) $@
 
 $(BUILD_DIR)/%.hex: $(BUILD_DIR)/%.elf | $(BUILD_DIR)
-	$(HEX) $< $@
+	@echo Preparing: $@
+	$(NO_ECHO)$(HEX) $< $@
 
 $(BUILD_DIR)/%.bin: $(BUILD_DIR)/%.elf | $(BUILD_DIR)
-	$(BIN) $< $@
+	@echo Preparing: $@
+	$(NO_ECHO)$(BIN) $< $@
 
-$(BUILD_DIR):
-	mkdir $@
 
 #######################################
-# clean up
+# Clean up
 #######################################
 clean:
-	$(NO_ECHO)$(RM) $(OUTPUT_DIRECTORY)
+	@echo Cleaning directory: $(BUILD_DIR)
+	$(NO_ECHO)$(RM) $(BUILD_DIR)\*
 
 #######################################
-# dependencies
+# Flash
+#######################################
+flash: all
+	openocd -f interface/stlink.cfg -f target/stm32f4x.cfg -c "program $(BUILD_DIR)/$(TARGET).elf verify reset exit"
+
+#######################################
+# Erase
+#######################################
+erase:
+	openocd -f interface/stlink.cfg -f target/stm32f4x.cfg -c "init; reset halt; flash erase_sector 0 0 last; exit"
+
+#######################################
+# Dependencies
 #######################################
 -include $(wildcard $(BUILD_DIR)/*.d)
-
-# *** EOF ***

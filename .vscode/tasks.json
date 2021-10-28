@@ -13,6 +13,12 @@
             }
         },
         {
+            "label": "Rebuild Debug",
+            "type": "shell",
+            "dependsOrder": "sequence",
+            "dependsOn": ["Clean", "Build Debug"]
+        },
+        {
             "label": "Build Release",
             "type": "shell",
             "command": "make -j8 all DEBUG=0",
@@ -22,9 +28,24 @@
             }
         },
         {
+            "label": "Rebuild Release",
+            "type": "shell",
+            "dependsOrder": "sequence",
+            "dependsOn": ["Clean", "Build Release"]
+        },
+        {
+            "label": "Clean",
+            "type": "shell",
+            "command": "make clean",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
             "label": "Flash device",
             "type": "shell",
-            "command": "st-flash write ./build/ECU.bin 0x08000000",
+            "command": "make flash",
             "group": {
                 "kind": "build",
                 "isDefault": true
@@ -33,7 +54,7 @@
         {
             "label": "Erase device",
             "type": "shell",
-            "command": "st-flash erase",
+            "command": "make erase",
             "group": {
                 "kind": "build",
                 "isDefault": true

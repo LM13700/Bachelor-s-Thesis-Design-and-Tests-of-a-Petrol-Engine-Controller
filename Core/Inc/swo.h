@@ -1,10 +1,12 @@
 /*===========================================================================*
- * File:        main.c
+ * File:        swo.h
  * Project:     ECU
- * Author:      Mateusz Mróz
- * Date:        06.09.2021
- * Brief:       Main.c
+ * Author:      Mateusz Mroz
+ * Date:        02.10.2021
+ * Brief:       SWO module
  *===========================================================================*/
+#ifndef _SWO_H_
+#define _SWO_H_
 
 /*===========================================================================*
  *
@@ -12,79 +14,70 @@
  *
  *===========================================================================*/
 
-#include "main.h"
-
-#include "swo.h"
-#include "trigger_decoder.h"
-
-SWO_DefineModuleTag(MAIN);
+#include "common_include.h"
 
 /*===========================================================================*
  *
- * DEFINES AND MACRO SECTION
+ * EXPORTED DEFINES AND MACRO SECTION
+ *
+ *===========================================================================*/
+
+#define SWO_DefineModuleTag(_TAG_)    static const char module_tag[] __attribute__((used)) = #_TAG_
+
+#ifdef __GNUC__
+    #define SWO_PrintLog(...)         SWO_PrintLogInternal(module_tag, __LINE__, __VA_ARGS__)
+#endif
+
+/*===========================================================================*
+ *
+ * EXPORTED TYPES AND ENUMERATION SECTION
  *
  *===========================================================================*/
 
 /*===========================================================================*
  *
- * LOCAL TYPES AND ENUMERATION SECTION
+ * EXPORTED GLOBAL VARIABLES SECTION
  *
  *===========================================================================*/
 
 /*===========================================================================*
  *
- * GLOBAL VARIABLES AND CONSTANTS SECTION
+ * EXPORTED FUNCTION DECLARATION SECTION
  *
  *===========================================================================*/
 
 /*===========================================================================*
- *
- * LOCAL FUNCTION DECLARATION SECTION
- *
- *===========================================================================*/
-
-/*===========================================================================*
- * brief:       Function calling initializing functions
+ * brief:       Initialize SWO interface
  * param[in]:   None
  * param[out]:  None
  * return:      None
  * details:     None
  *===========================================================================*/
-void MAIN_CallInits(void);
+void SWO_Init(void);
 
 /*===========================================================================*
- *
- * FUNCTION DEFINITION SECTION
- *
+ * brief:       SWO printf alike implementation
+ * param[in]:   format - a string to be written to output
+ * param[in]:   ... - additional agruments
+ * param[out]:  None
+ * return:      None
+ * details:     None
  *===========================================================================*/
+void SWO_Print(char* format, ...) __attribute__ ((__format__(printf, 1, 2)));
 
 /*===========================================================================*
- * Function: main
+ * brief:       SWO printf wrapper allowing logging the calling module name and line num
+ * param[in]:   moduleTag - a string containing module name
+ * param[in]:   codeLine - the calling module line number
+ * param[in]:   format - a string to be written to output
+ * param[in]:   ... - additional agruments
+ * param[out]:  None
+ * return:      None
+ * details:     It is recommended to use this function only via macro Debug_PrintLog
  *===========================================================================*/
-int main(void)
-{
-    MAIN_CallInits();
-
-    while(1)
-    {
-        __WFE();
-    }
-}
-
-/*===========================================================================*
- *
- * LOCAL FUNCTION DEFINITION SECTION
- *
- *===========================================================================*/
-
-/*===========================================================================*
- * Function: MAIN_CallInits
- *===========================================================================*/
-void MAIN_CallInits(void)
-{
-    SWO_Init();
-    TRIGD_Init();
-}
+void SWO_PrintLogInternal(const char* moduleTag, const int codeLine, char* format, ...)
+                          __attribute__ ((__format__(printf, 3, 4)));
 
 
+#endif
 /* end of file */

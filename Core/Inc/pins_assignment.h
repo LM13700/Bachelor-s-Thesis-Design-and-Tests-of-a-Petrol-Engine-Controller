@@ -1,12 +1,12 @@
 /*===========================================================================*
- * File:        main.h
+ * File:        pins_assignment.h
  * Project:     ECU
  * Author:      Mateusz Mroz
- * Date:        06.09.2021
- * Brief:       Main.h
+ * Date:        24.10.2021
+ * Brief:       Pins assignment
  *===========================================================================*/
-#ifndef _MAIN_H_
-#define _MAIN_H_
+#ifndef _PINS_CONFIG_H_
+#define _PINS_CONFIG_H_
 
 /*===========================================================================*
  *
