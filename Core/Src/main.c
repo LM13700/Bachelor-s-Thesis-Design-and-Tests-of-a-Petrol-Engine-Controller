@@ -15,6 +15,7 @@
 #include "main.h"
 
 #include "swo.h"
+#include "trigger_decoder.h"
 
 SWO_DefineModuleTag(MAIN);
 
@@ -23,10 +24,6 @@ SWO_DefineModuleTag(MAIN);
  * DEFINES AND MACRO SECTION
  *
  *===========================================================================*/
-
-#define LEDPORT                 (GPIOC)
-#define LED1                    (13u)
-#define ENABLE_GPIO_CLOCK       (RCC->AHB1ENR |= RCC_AHB1ENR_GPIOCEN)
 
 /*===========================================================================*
  *
@@ -47,13 +44,13 @@ SWO_DefineModuleTag(MAIN);
  *===========================================================================*/
 
 /*===========================================================================*
- * brief:       Function stopping MCU for given time
- * param[in]:   ms - time in ms
+ * brief:       Function calling initializing functions
+ * param[in]:   None
  * param[out]:  None
  * return:      None
  * details:     None
  *===========================================================================*/
-static void Main_MsDelay(uint32_t ms);
+void MAIN_CallInits(void);
 
 /*===========================================================================*
  *
@@ -66,13 +63,11 @@ static void Main_MsDelay(uint32_t ms);
  *===========================================================================*/
 int main(void)
 {
-    SWO_Init();
+    MAIN_CallInits();
 
     while(1)
     {
-        SWO_Print("Hello world from SWO %d\n", 1u);
-        SWO_PrintLog("Hello world from SWO %d\n", 2u);
-        Main_MsDelay(1000u);
+        __WFE();
     }
 }
 
@@ -83,21 +78,12 @@ int main(void)
  *===========================================================================*/
 
 /*===========================================================================*
- * Function: Main_MsDelay
+ * Function: MAIN_CallInits
  *===========================================================================*/
-static void Main_MsDelay(uint32_t ms)
+void MAIN_CallInits(void)
 {
-    volatile uint32_t x;
-
-    while (ms-- > 0)
-    {
-        x = 500;
-
-        while (x-- > 0)
-        {
-            __NOP();
-        }
-    }
+    SWO_Init();
+    TRIGD_Init();
 }
 
 

@@ -26,6 +26,9 @@
  *
  *===========================================================================*/
 
+#define EXTI_GetPendingTrigger(_TRIGGER_)           (EXTI->PR & _TRIGGER_)
+#define EXTI_ClearPendingTrigger(_TRIGGER_)         (EXTI->PR |= _TRIGGER_)
+
 /*===========================================================================*
  *
  * EXPORTED TYPES AND ENUMERATION SECTION

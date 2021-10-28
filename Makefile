@@ -22,8 +22,9 @@ RM := del /q
 C_SOURCES =  \
 Core/Src/system_stm32f4xx.c \
 Core/Src/main.c \
-Core/Src/utils.c \
 Core/Src/swo.c \
+Core/Src/trigger_decoder.c \
+Core/Src/utils.c \
 
 # C includes
 C_INCLUDES = \
