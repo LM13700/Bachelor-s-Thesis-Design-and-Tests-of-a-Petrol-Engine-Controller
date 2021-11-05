@@ -178,13 +178,14 @@ clean:
 # Flash
 #######################################
 flash: all
-	openocd -f interface/stlink.cfg -f target/stm32f4x.cfg -c "program $(BUILD_DIR)/$(TARGET).elf verify reset exit"
+	openocd -f stm32f4x_hardware_reset.cfg -c "program $(BUILD_DIR)/$(TARGET).elf verify; reset; exit"
+
 
 #######################################
 # Erase
 #######################################
 erase:
-	openocd -f interface/stlink.cfg -f target/stm32f4x.cfg -c "init; reset halt; flash erase_sector 0 0 last; exit"
+	openocd -f stm32f4x_hardware_reset.cfg -c "init; reset halt; flash erase_sector 0 0 last; exit"
 
 #######################################
 # Dependencies

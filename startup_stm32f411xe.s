@@ -141,7 +141,7 @@ g_pfnVectors:
   .word  0
   .word  PendSV_Handler
   .word  SysTick_Handler
-  
+
   /* External Interrupts */
   .word     WWDG_IRQHandler                   /* Window WatchDog              */                                        
   .word     PVD_IRQHandler                    /* PVD through EXTI Line detection */                        

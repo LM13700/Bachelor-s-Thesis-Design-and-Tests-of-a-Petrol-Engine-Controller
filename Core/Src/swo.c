@@ -160,6 +160,7 @@ static void SWO_InternalPrint(char* const format, va_list args)
             {
                 /* Decimal */
                 case 'd':
+                case 'u':
                 {
                     value = va_arg(args, int);
 
