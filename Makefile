@@ -84,6 +84,10 @@ AS_DEFS :=
 C_DEFS := \
 -DSTM32F411xE
 
+# General flags
+GFLAGS += -fdata-sections
+GFLAGS += -ffunction-sections
+
 # Warning flags
 WFLAGS += -Wall
 WFLAGS += -Wextra
@@ -102,9 +106,9 @@ WFLAGS += -Wuninitialized
 WFLAGS += -Wunsafe-loop-optimizations
 
 # compile gcc flags
-ASFLAGS += $(MCU) $(AS_DEFS) $(AS_INCLUDES) $(OPT) $(WFLAGS) -fdata-sections -ffunction-sections
+ASFLAGS += $(MCU) $(AS_DEFS) $(AS_INCLUDES) $(OPT) $(WFLAGS) $(GFLAGS)
 
-CFLAGS += $(MCU) $(C_DEFS) $(C_INCLUDES) $(OPT) $(WFLAGS) -fdata-sections -ffunction-sections -std=c99
+CFLAGS += $(MCU) $(C_DEFS) $(C_INCLUDES) $(OPT) $(WFLAGS) $(GFLAGS) -fdiagnostics-color=auto -std=c99
 
 ifeq ($(DEBUG), 1)
 CFLAGS += -g3 -gdwarf-2 -DDEBUG
