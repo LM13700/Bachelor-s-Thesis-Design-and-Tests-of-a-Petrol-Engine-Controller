@@ -24,16 +24,24 @@ SWO_DefineModuleTag(TRIGD);
  *
  *===========================================================================*/
 
+/* Angle of engine used for synchronisation */
+/* This angle is set at first speed signal after sync signal */
+#define TRIGD_TRIGGER_ANGLE                     (180.0F)
+
+#define TRIGD_CALCULATE_RPM(_TIM_REG_VALUE_)    (360.0F / (((_TIM_REG_VALUE_) / SystemCoreClock) * 30.0F))
+
 /*===========================================================================*
  *
  * LOCAL TYPES AND ENUMERATION SECTION
  *
  *===========================================================================*/
 
-    /* Current engine angle in degrees, 0 means beginning of the combustion stroke */
-    static volatile uint32_t engine_angle;
-    /* Current engine speed in RPM */
-    static volatile float engine_speed;
+/* Current engine angle in degrees, 0 means beginning of the first piston combustion stroke */
+static volatile float trigd_engine_angle;
+/* Current engine speed in RPM */
+static volatile float trigd_engine_speed;
+/* Flag set when sync signal was received */
+static volatile bool trigd_is_sync_pending;
 
 /*===========================================================================*
  *
@@ -94,6 +102,10 @@ static void TRIGD_SpeedPinInit(void);
  *===========================================================================*/
 void TRIGD_Init()
 {
+    trigd_engine_angle = TRIGD_ANGLE_UNKNOWN;
+    trigd_engine_speed = 0.0F;
+    trigd_is_sync_pending = false;
+
     TRIGD_SyncPinInit();
     TRIGD_SpeedPinInit();
 }
@@ -111,8 +123,10 @@ void EXTI0_IRQHandler(void)
 {
     if (EXTI_GetPendingTrigger(EXTI_PR_PR0))
     {
+        trigd_is_sync_pending= true;
         EXTI_ClearPendingTrigger(EXTI_PR_PR0);
     }
+
 
     NVIC_ClearPendingIRQ(EXTI0_IRQn);
 }
@@ -122,7 +136,46 @@ void EXTI0_IRQHandler(void)
  *===========================================================================*/
 void TIM2_IRQHandler(void)
 {
-    
+    static bool isLastValueCaptured = false;
+    static uint32_t lastCapturedValue;
+    uint32_t tmpCaptureValue;
+
+    /* Enter criticial section */
+    __disable_irq();
+
+    /* Capture interrupt */
+    if (TIM2->SR & TIM_SR_CC2IF)
+    {
+        tmpCaptureValue = TIM2->CCR2;
+        if (isLastValueCaptured)
+        {
+            if (tmpCaptureValue > lastCapturedValue)
+            {
+                trigd_engine_speed = TRIGD_CALCULATE_RPM(tmpCaptureValue - lastCapturedValue);
+            }
+            else
+            {
+
+            }
+        }
+
+        lastCapturedValue = tmpCaptureValue;
+    }
+    /* Overflow interrupt */
+    else if (TIM2->SR & TIM_SR_UIF)
+    {
+        TIM2->SR &= ~TIM_SR_UIF;
+        isLastValueCaptured = false;
+        trigd_engine_angle = TRIGD_ANGLE_UNKNOWN;
+    }
+    else
+    {
+        /* Do nothing*/
+    }
+
+    /* Exit criticial section */
+    __enable_irq();
+
     NVIC_ClearPendingIRQ(TIM2_IRQn);
 }
 
