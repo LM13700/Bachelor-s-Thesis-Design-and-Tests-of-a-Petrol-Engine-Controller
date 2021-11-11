@@ -1,10 +1,12 @@
 /*===========================================================================*
- * File:        main.c
+ * File:        ignition_driver.h
  * Project:     ECU
- * Author:      Mateusz Mróz
- * Date:        06.09.2021
- * Brief:       Main.c
+ * Author:      Mateusz Mroz
+ * Date:        09.11.2021
+ * Brief:       Ignition colis driver module
  *===========================================================================*/
+#ifndef _IGNITION_DRIVER_H_
+#define _IGNITION_DRIVER_H_
 
 /*===========================================================================*
  *
@@ -12,81 +14,68 @@
  *
  *===========================================================================*/
 
-#include "main.h"
-
-#include "ignition_driver.h"
-#include "swo.h"
-#include "trigger_decoder.h"
-
-SWO_DefineModuleTag(MAIN);
+#include "common_include.h"
 
 /*===========================================================================*
  *
- * DEFINES AND MACRO SECTION
+ * EXPORTED DEFINES AND MACRO SECTION
  *
  *===========================================================================*/
 
 /*===========================================================================*
  *
- * LOCAL TYPES AND ENUMERATION SECTION
+ * EXPORTED TYPES AND ENUMERATION SECTION
+ *
+ *===========================================================================*/
+
+typedef enum IgDrv_IgnitionChannels_Tag
+{
+    IGNDRV_CHANNEL_1,
+    IGNDRV_CHANNEL_2,
+    IGNDRV_CHANNEL_3,
+
+    IGDRV_CHANNEL_COUNT
+} IgDrv_IgnitionChannels_T;
+
+/*===========================================================================*
+ *
+ * EXPORTED GLOBAL VARIABLES SECTION
  *
  *===========================================================================*/
 
 /*===========================================================================*
  *
- * GLOBAL VARIABLES AND CONSTANTS SECTION
+ * EXPORTED FUNCTION DECLARATION SECTION
  *
  *===========================================================================*/
 
 /*===========================================================================*
- *
- * LOCAL FUNCTION DECLARATION SECTION
- *
- *===========================================================================*/
-
-/*===========================================================================*
- * brief:       Function calling initializing functions
+ * brief:       Initialize ignition driver module
  * param[in]:   None
  * param[out]:  None
  * return:      None
  * details:     None
  *===========================================================================*/
-void MAIN_CallInits(void);
+void IGNDRV_Init(void);
 
 /*===========================================================================*
- *
- * FUNCTION DEFINITION SECTION
- *
+ * brief:       Prepere ignition channel
+ * param[in]:   channel - channel which will be prepared
+ * param[out]:  None
+ * return:      None
+ * details:     None
  *===========================================================================*/
+void IGNDRV_PrepareIgnitionChannel(IgDrv_IgnitionChannels_T channel);
 
 /*===========================================================================*
- * Function: main
+ * brief:       Starts ignition timer
+ * param[in]:   None
+ * param[out]:  None
+ * return:      None
+ * details:     It is necessary to previously prepare proper channel via prepare function
  *===========================================================================*/
-int main(void)
-{
-    MAIN_CallInits();
-
-    while(1)
-    {
-        WaitForInterrupt();
-    }
-}
-
-/*===========================================================================*
- *
- * LOCAL FUNCTION DEFINITION SECTION
- *
- *===========================================================================*/
-
-/*===========================================================================*
- * Function: MAIN_CallInits
- *===========================================================================*/
-void MAIN_CallInits(void)
-{
-    SWO_Init();
-    TRIGD_Init();
-    IGNDRV_Init();
-}
+void IGNDRV_StartIgnitionTimer(void);
 
 
+#endif
 /* end of file */

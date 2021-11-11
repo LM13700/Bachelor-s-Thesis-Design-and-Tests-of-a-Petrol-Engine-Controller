@@ -1,9 +1,9 @@
 /*===========================================================================*
- * File:        main.c
+ * File:        ignition_driver.c
  * Project:     ECU
- * Author:      Mateusz Mróz
- * Date:        06.09.2021
- * Brief:       Main.c
+ * Author:      Mateusz Mroz
+ * Date:        09.11.2021
+ * Brief:       Ignition coils driver module
  *===========================================================================*/
 
 /*===========================================================================*
@@ -12,13 +12,7 @@
  *
  *===========================================================================*/
 
-#include "main.h"
-
 #include "ignition_driver.h"
-#include "swo.h"
-#include "trigger_decoder.h"
-
-SWO_DefineModuleTag(MAIN);
 
 /*===========================================================================*
  *
@@ -45,31 +39,43 @@ SWO_DefineModuleTag(MAIN);
  *===========================================================================*/
 
 /*===========================================================================*
- * brief:       Function calling initializing functions
- * param[in]:   None
- * param[out]:  None
- * return:      None
- * details:     None
- *===========================================================================*/
-void MAIN_CallInits(void);
-
-/*===========================================================================*
  *
  * FUNCTION DEFINITION SECTION
  *
  *===========================================================================*/
 
 /*===========================================================================*
- * Function: main
+ * Function: IGNDRV_Init
  *===========================================================================*/
-int main(void)
+void IGNDRV_Init(void)
 {
-    MAIN_CallInits();
+    /* Ignition timer: TIM2 CH1-CH3 */
 
-    while(1)
-    {
-        WaitForInterrupt();
-    }
+    /* Enable TIM2 clock*/
+    RCC->APB1ENR |= RCC_APB1ENR_TIM2EN;
+
+    /* Set TIM2 clock prescaler to 0 (source clock divided by 0+1) */
+    TIM2->PSC |= TIM_PSC_PSC_Msk;
+
+
+    /* Set TIM2 auto-reload register to its max value */
+    TIM2->ARR |= TIM_ARR_ARR_Msk;
+}
+
+/*===========================================================================*
+ * Function: IGNDRV_PrepareIgnitionChannel
+ *===========================================================================*/
+void IGNDRV_PrepareIgnitionChannel(IgDrv_IgnitionChannels_T channel)
+{
+    
+}
+
+/*===========================================================================*
+ * Function: IGNDRV_StartIgnitionTimer
+ *===========================================================================*/
+void IGNDRV_StartIgnitionTimer(void)
+{
+    
 }
 
 /*===========================================================================*
@@ -77,16 +83,6 @@ int main(void)
  * LOCAL FUNCTION DEFINITION SECTION
  *
  *===========================================================================*/
-
-/*===========================================================================*
- * Function: MAIN_CallInits
- *===========================================================================*/
-void MAIN_CallInits(void)
-{
-    SWO_Init();
-    TRIGD_Init();
-    IGNDRV_Init();
-}
 
 
 /* end of file */

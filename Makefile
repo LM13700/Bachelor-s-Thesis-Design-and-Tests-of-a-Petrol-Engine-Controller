@@ -114,7 +114,7 @@ ifeq ($(DEBUG), 1)
 CFLAGS += -g3 -gdwarf-2 -DDEBUG
 OPT += -Og
 else
-OPT += -O2
+OPT += -Ofast
 endif
 
 # Generate dependency information

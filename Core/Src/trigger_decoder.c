@@ -14,6 +14,7 @@
 
 #include "trigger_decoder.h"
 
+#include "engine_constants.h"
 #include "swo.h"
 
 SWO_DefineModuleTag(TRIGD);
@@ -24,11 +25,12 @@ SWO_DefineModuleTag(TRIGD);
  *
  *===========================================================================*/
 
-/* Angle of engine used for synchronisation */
-/* This angle is set at first speed signal after sync signal */
-#define TRIGD_TRIGGER_ANGLE                     (180.0F)
+#define TRIGD_SPEED_TIMER_MAX_VAL               (UINT32_MAX)
+#define TRIGD_SPEED_TIMER_REGISTER              (TIM3->CCR2)
 
-#define TRIGD_CALCULATE_RPM(_TIM_REG_VALUE_)    (360.0F / (((_TIM_REG_VALUE_) / SystemCoreClock) * 30.0F))
+#define TRIGD_SECONDS_IN_MINUTE                 (60.0F)
+#define TRIGD_CALCULATE_RPM(_TIM_REG_VALUE_)    (TRIGD_SECONDS_IN_MINUTE * ((_TIM_REG_VALUE_) / SystemCoreClock) *    \
+                                                 ENGINE_CONST_TRIGGER_WHEEL_TEETH_NO)
 
 /*===========================================================================*
  *
@@ -65,13 +67,13 @@ static volatile bool trigd_is_sync_pending;
 extern void EXTI0_IRQHandler(void);
 
 /*===========================================================================*
- * brief:       TIM2 Interrupt request handler
+ * brief:       TIM3 Interrupt request handler
  * param[in]:   None
  * param[out]:  None
  * return:      None
  * details:     Speed signal conditioning ISR
  *===========================================================================*/
-extern void TIM2_IRQHandler(void);
+extern void TIM3_IRQHandler(void);
 
 /*===========================================================================*
  * brief:       Initialize sync input pin
@@ -126,45 +128,63 @@ void EXTI0_IRQHandler(void)
         trigd_is_sync_pending= true;
         EXTI_ClearPendingTrigger(EXTI_PR_PR0);
     }
-
-
-    NVIC_ClearPendingIRQ(EXTI0_IRQn);
 }
 
 /*===========================================================================*
- * Function: TIM2_IRQHandler
+ * Function: TIM3_IRQHandler
  *===========================================================================*/
-void TIM2_IRQHandler(void)
+void TIM3_IRQHandler(void)
 {
     static bool isLastValueCaptured = false;
     static uint32_t lastCapturedValue;
-    uint32_t tmpCaptureValue;
 
-    /* Enter criticial section */
+    /* Disable interrupts */
     __disable_irq();
 
     /* Capture interrupt */
-    if (TIM2->SR & TIM_SR_CC2IF)
+    if (TIM3->SR & TIM_SR_CC2IF)
     {
-        tmpCaptureValue = TIM2->CCR2;
+        /* Clear interrupt flag */
+        TIM3->SR &= ~TIM_SR_CC2IF;
+
         if (isLastValueCaptured)
         {
-            if (tmpCaptureValue > lastCapturedValue)
+            if (TRIGD_SPEED_TIMER_REGISTER >= lastCapturedValue)
             {
-                trigd_engine_speed = TRIGD_CALCULATE_RPM(tmpCaptureValue - lastCapturedValue);
+                trigd_engine_speed = TRIGD_CALCULATE_RPM(TRIGD_SPEED_TIMER_REGISTER - lastCapturedValue);
             }
             else
             {
-
+                trigd_engine_speed = TRIGD_CALCULATE_RPM((TRIGD_SPEED_TIMER_MAX_VAL - lastCapturedValue) +
+                                                         TRIGD_SPEED_TIMER_REGISTER);
             }
         }
 
-        lastCapturedValue = tmpCaptureValue;
+        if (trigd_is_sync_pending)
+        {
+            trigd_engine_angle = ENGINE_CONST_TRIGGER_ANGLE;
+            trigd_is_sync_pending = false;
+        }
+        else
+        {
+            if (trigd_engine_angle != TRIGD_ANGLE_UNKNOWN)
+            {
+                trigd_engine_angle += (ENGINE_CONST_ENGINE_ONE_ROTATION_ANGLE / ENGINE_CONST_TRIGGER_WHEEL_TEETH_NO);
+                if (trigd_engine_angle >= ENGINE_CONST_ENGINE_FULL_CYCLE_ANGLE)
+                {
+                    trigd_engine_angle -= ENGINE_CONST_ENGINE_FULL_CYCLE_ANGLE;
+                }
+            }
+        }
+
+        lastCapturedValue = TRIGD_SPEED_TIMER_REGISTER;
+        isLastValueCaptured = true;
     }
     /* Overflow interrupt */
-    else if (TIM2->SR & TIM_SR_UIF)
+    else if (TIM3->SR & TIM_SR_UIF)
     {
-        TIM2->SR &= ~TIM_SR_UIF;
+        /* Clear interrupt flag */
+        TIM3->SR &= ~TIM_SR_UIF;
         isLastValueCaptured = false;
         trigd_engine_angle = TRIGD_ANGLE_UNKNOWN;
     }
@@ -173,10 +193,8 @@ void TIM2_IRQHandler(void)
         /* Do nothing*/
     }
 
-    /* Exit criticial section */
+    /* Enable interrupts */
     __enable_irq();
-
-    NVIC_ClearPendingIRQ(TIM2_IRQn);
 }
 
 /*===========================================================================*
@@ -213,33 +231,33 @@ static void TRIGD_SyncPinInit(void)
  *===========================================================================*/
 static void TRIGD_SpeedPinInit(void)
 {
-    /* Speed input pin: PA1 */
-    /* Speed input timer: TIM2 CH2 */
+    /* Speed input pin: PA6 */
+    /* Speed input timer: TIM3 CH1 */
 
     /* Enable GPIOA clock */
     RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN;
-    /* Set PA1 afternative function 1 (TIM2_CH2) */
-    GPIOA->AFR[1] |= GPIO_AFRL_AFSEL0_0;
-    /* Enable TIM2 clock*/
-    RCC->APB1ENR |= RCC_APB1ENR_TIM2EN;
+    /* Set PA6 afternative function 2 (TIM3_CH1) */
+    GPIOA->AFR[0] |= GPIO_AFRL_AFSEL6_1;
+    /* Enable TIM3 clock*/
+    RCC->APB1ENR |= RCC_APB1ENR_TIM3EN;
 
-    /* Set TIM2 clock prescaler to 0 (source clock divided by 0+1) */
-    TIM2->PSC |= TIM_PSC_PSC_Msk;
-    /* Set TIM2 auto-reload register to its max value */
-    TIM2->ARR |= TIM_ARR_ARR_Msk;
+    /* Set TIM3 clock prescaler to 0 (source clock divided by 0+1) */
+    TIM3->PSC |= TIM_PSC_PSC_Msk;
+    /* Set TIM3 auto-reload register to its max value */
+    TIM3->ARR |= TIM_ARR_ARR_Msk;
 
-    /* Link TI2 input to the capture logic */
-    TIM2->CCMR1 |= TIM_CCMR1_CC2S_0;
+    /* Link TIM3 input to the capture logic */
+    TIM3->CCMR1 |= TIM_CCMR1_CC2S_0;
     /* Enable rising edge trigger */
-    TIM2->CCER &= ~TIM_CCER_CC2P;
-    TIM2->CCER &= ~TIM_CCER_CC2NP;
+    TIM3->CCER &= ~TIM_CCER_CC2P;
+    TIM3->CCER &= ~TIM_CCER_CC2NP;
     /* Enable capture */
-    TIM2->CCER |= TIM_CCER_CC2E;
+    TIM3->CCER |= TIM_CCER_CC2E;
 
     /* Enable interrupt request */
-    TIM2->DIER |= TIM_DIER_CC2IE;
-    NVIC_ClearPendingIRQ(TIM2_IRQn);
-    NVIC_EnableIRQ(TIM2_IRQn);
+    TIM3->DIER |= TIM_DIER_CC2IE;
+    NVIC_ClearPendingIRQ(TIM3_IRQn);
+    NVIC_EnableIRQ(TIM3_IRQn);
 }
 
 
