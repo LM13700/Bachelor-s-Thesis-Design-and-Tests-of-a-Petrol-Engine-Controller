@@ -60,21 +60,23 @@ void IGNDRV_Init(void);
 
 /*===========================================================================*
  * brief:       Prepere ignition channel
- * param[in]:   channel - channel which will be prepared
+ * param[in]:   channel - ignition channel to be prepared
+ * param[in]:   fireAngle - engine angle at which ignition need to occure
+ * param[in]:   startAngle - engine angle at which timer will be started
  * param[out]:  None
  * return:      None
  * details:     None
  *===========================================================================*/
-void IGNDRV_PrepareIgnitionChannel(IgDrv_IgnitionChannels_T channel);
+void IGNDRV_PrepareIgnitionChannel(IgDrv_IgnitionChannels_T channel, float fireAngle, float startAngle);
 
 /*===========================================================================*
  * brief:       Starts ignition timer
- * param[in]:   None
+ * param[in]:   channel - channel which will be fired
  * param[out]:  None
  * return:      None
  * details:     It is necessary to previously prepare proper channel via prepare function
  *===========================================================================*/
-void IGNDRV_StartIgnitionTimer(void);
+void IGNDRV_StartIgnitionModule(IgDrv_IgnitionChannels_T channel);
 
 
 #endif

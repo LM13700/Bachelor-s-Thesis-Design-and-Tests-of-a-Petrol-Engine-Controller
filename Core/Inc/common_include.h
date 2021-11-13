@@ -27,28 +27,6 @@
  *
  *===========================================================================*/
 
-#define EXTI_GetPendingTrigger(_TRIGGER_)           (EXTI->PR & _TRIGGER_)
-#define EXTI_ClearPendingTrigger(_TRIGGER_)         (EXTI->PR |= _TRIGGER_)
-
-#if DEBUG
-#define WaitForInterrupt()                            __NOP()
-#else
-#define WaitForInterrupt()                            __WFI()
-#endif
-
-/*===========================================================================*
- *
- * EXPORTED TYPES AND ENUMERATION SECTION
- *
- *===========================================================================*/
-
-typedef enum Common_Result_Tag
-{
-    COMMON_OK,
-    COMMON_NOT_OK
-
-} Common_Result_T;
-
 /*===========================================================================*
  *
  * EXPORTED GLOBAL VARIABLES SECTION

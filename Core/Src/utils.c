@@ -68,6 +68,25 @@ char* Utils_Itoa(unsigned int number, unsigned int base)
 }
 
 /*===========================================================================*
+ * Function: Utils_FloatToUint32
+ *===========================================================================*/
+uint32_t Utils_FloatToUint32(float inValue)
+{
+    uint32_t result;
+
+    if (inValue >= 0)
+    {
+        result = (uint32_t)(inValue + 0.5F);
+    }
+    else
+    {
+        result = 0;
+    }
+
+    return result;
+}
+
+/*===========================================================================*
  *
  * LOCAL FUNCTION DEFINITION SECTION
  *

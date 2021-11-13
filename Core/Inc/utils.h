@@ -14,13 +14,41 @@
  *
  *===========================================================================*/
 
+#include "stm32f411xe.h"
+
 /*===========================================================================*
  *
  * EXPORTED DEFINES AND MACRO SECTION
  *
  *===========================================================================*/
 
-#define ITOA(_NUMBER_, _BASE_)                  Utils_Itoa(_NUMBER_, _BASE_)
+#define EXTI_GetPendingTrigger(_TRIGGER_)           (EXTI->PR & _TRIGGER_)
+#define EXTI_ClearPendingTrigger(_TRIGGER_)         (EXTI->PR |= _TRIGGER_)
+
+#if DEBUG
+#define WaitForInterrupt()                            __NOP()
+#else
+#define WaitForInterrupt()                            __WFI()
+#endif
+
+#define ITOA(_NUMBER_, _BASE_)                                  Utils_Itoa(_NUMBER_, _BASE_)
+
+/* DIFFERENCE = MINUEND - SUBTRAHEND */
+#define UTILS_CIRCULAR_DIFFERENCE(_MIN_, _SUB_, _LOOP_VAL_)     ((_MIN_ >= _SUB_) ? (_MIN_ - _SUB_) :    \
+                                                                 ((_LOOP_VAL_ - _SUB_) + _MIN_))
+
+/*===========================================================================*
+ *
+ * EXPORTED TYPES AND ENUMERATION SECTION
+ *
+ *===========================================================================*/
+
+typedef enum Result_Tag
+{
+    OK,
+    NOT_OK
+
+} Result_T;
 
 /*===========================================================================*
  *
@@ -37,6 +65,18 @@
  * details:     None
  *===========================================================================*/
 char* Utils_Itoa(unsigned int number, unsigned int base);
+
+/*===========================================================================*
+ * brief:       Converts float value to uint32_t with rounding
+ * param[in]:   inValue - a float value to be converted
+ * param[out]:  None
+ * return:      uint32_t - result
+ * details:     When input value is negative, zero will be returned
+ * 
+ *              WARNING: This function is really simple thus don't consider many cases,
+ *              some roundings may be incorrect. On the other hand it's fast.
+ *===========================================================================*/
+uint32_t Utils_FloatToUint32(float inValue);
 
 
 #endif

@@ -16,6 +16,7 @@
 
 #include "engine_constants.h"
 #include "swo.h"
+#include "timers.h"
 
 SWO_DefineModuleTag(TRIGD);
 
@@ -25,12 +26,8 @@ SWO_DefineModuleTag(TRIGD);
  *
  *===========================================================================*/
 
-#define TRIGD_SPEED_TIMER_MAX_VAL               (UINT32_MAX)
-#define TRIGD_SPEED_TIMER_REGISTER              (TIM3->CCR2)
-
-#define TRIGD_SECONDS_IN_MINUTE                 (60.0F)
-#define TRIGD_CALCULATE_RPM(_TIM_REG_VALUE_)    (TRIGD_SECONDS_IN_MINUTE * ((_TIM_REG_VALUE_) / SystemCoreClock) *    \
-                                                 ENGINE_CONST_TRIGGER_WHEEL_TEETH_NO)
+#define TRIGD_SPEED_TIMER_MAX_VAL               (UINT16_MAX)
+#define TRIGD_SPEED_TIMER_REGISTER              (TIMER_SPEED->CCR2)
 
 /*===========================================================================*
  *
@@ -40,8 +37,6 @@ SWO_DefineModuleTag(TRIGD);
 
 /* Current engine angle in degrees, 0 means beginning of the first piston combustion stroke */
 static volatile float trigd_engine_angle;
-/* Current engine speed in RPM */
-static volatile float trigd_engine_speed;
 /* Flag set when sync signal was received */
 static volatile bool trigd_is_sync_pending;
 
@@ -104,8 +99,7 @@ static void TRIGD_SpeedPinInit(void);
  *===========================================================================*/
 void TRIGD_Init()
 {
-    trigd_engine_angle = TRIGD_ANGLE_UNKNOWN;
-    trigd_engine_speed = 0.0F;
+    trigd_engine_angle = ENGINE_CONST_ANGLE_UNKNOWN;
     trigd_is_sync_pending = false;
 
     TRIGD_SyncPinInit();
@@ -142,22 +136,15 @@ void TIM3_IRQHandler(void)
     __disable_irq();
 
     /* Capture interrupt */
-    if (TIM3->SR & TIM_SR_CC2IF)
+    if (TIMER_SPEED->SR & TIM_SR_CC2IF)
     {
         /* Clear interrupt flag */
-        TIM3->SR &= ~TIM_SR_CC2IF;
+        TIMER_SPEED->SR &= ~TIM_SR_CC2IF;
 
         if (isLastValueCaptured)
         {
-            if (TRIGD_SPEED_TIMER_REGISTER >= lastCapturedValue)
-            {
-                trigd_engine_speed = TRIGD_CALCULATE_RPM(TRIGD_SPEED_TIMER_REGISTER - lastCapturedValue);
-            }
-            else
-            {
-                trigd_engine_speed = TRIGD_CALCULATE_RPM((TRIGD_SPEED_TIMER_MAX_VAL - lastCapturedValue) +
-                                                         TRIGD_SPEED_TIMER_REGISTER);
-            }
+            ENGCON_UpdateEngineSpeed(UTILS_CIRCULAR_DIFFERENCE(TRIGD_SPEED_TIMER_REGISTER, lastCapturedValue,
+                                     TRIGD_SPEED_TIMER_MAX_VAL));
         }
 
         if (trigd_is_sync_pending)
@@ -167,9 +154,9 @@ void TIM3_IRQHandler(void)
         }
         else
         {
-            if (trigd_engine_angle != TRIGD_ANGLE_UNKNOWN)
+            if (trigd_engine_angle != ENGINE_CONST_ANGLE_UNKNOWN)
             {
-                trigd_engine_angle += (ENGINE_CONST_ENGINE_ONE_ROTATION_ANGLE / ENGINE_CONST_TRIGGER_WHEEL_TEETH_NO);
+                trigd_engine_angle += (ENGINE_CONST_ONE_TRIGGER_PULSE_ANGLE);
                 if (trigd_engine_angle >= ENGINE_CONST_ENGINE_FULL_CYCLE_ANGLE)
                 {
                     trigd_engine_angle -= ENGINE_CONST_ENGINE_FULL_CYCLE_ANGLE;
@@ -177,16 +164,19 @@ void TIM3_IRQHandler(void)
             }
         }
 
+        ENGCON_UpdateEngineAngle(trigd_engine_angle);
         lastCapturedValue = TRIGD_SPEED_TIMER_REGISTER;
         isLastValueCaptured = true;
     }
     /* Overflow interrupt */
-    else if (TIM3->SR & TIM_SR_UIF)
+    else if (TIMER_SPEED->SR & TIM_SR_UIF)
     {
         /* Clear interrupt flag */
-        TIM3->SR &= ~TIM_SR_UIF;
+        TIMER_SPEED->SR &= ~TIM_SR_UIF;
         isLastValueCaptured = false;
-        trigd_engine_angle = TRIGD_ANGLE_UNKNOWN;
+        trigd_engine_angle = ENGINE_CONST_ANGLE_UNKNOWN;
+        ENGCON_UpdateEngineAngle(trigd_engine_angle);
+        ENGCON_UpdateEngineSpeed(ENGINE_CONST_SPEED_RAW_UNKNOWN);
     }
     else
     {
@@ -238,26 +228,34 @@ static void TRIGD_SpeedPinInit(void)
     RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN;
     /* Set PA6 afternative function 2 (TIM3_CH1) */
     GPIOA->AFR[0] |= GPIO_AFRL_AFSEL6_1;
-    /* Enable TIM3 clock*/
+    /* Enable timer clock*/
     RCC->APB1ENR |= RCC_APB1ENR_TIM3EN;
 
-    /* Set TIM3 clock prescaler to 0 (source clock divided by 0+1) */
-    TIM3->PSC |= TIM_PSC_PSC_Msk;
-    /* Set TIM3 auto-reload register to its max value */
-    TIM3->ARR |= TIM_ARR_ARR_Msk;
+    /* Set timer clock prescaler to 0 (source clock divided by 0+1) */
+    TIMER_SPEED->PSC &= ~TIM_PSC_PSC;
+    /* Set timer auto-reload register to its max value */
+    TIMER_SPEED->ARR |= TIM_ARR_ARR;
 
-    /* Link TIM3 input to the capture logic */
-    TIM3->CCMR1 |= TIM_CCMR1_CC2S_0;
+    /* Link timer input to the capture logic */
+    TIMER_SPEED->CCMR1 |= TIM_CCMR1_CC2S_0;
     /* Enable rising edge trigger */
-    TIM3->CCER &= ~TIM_CCER_CC2P;
-    TIM3->CCER &= ~TIM_CCER_CC2NP;
+    TIMER_SPEED->CCER &= ~TIM_CCER_CC2P;
+    TIMER_SPEED->CCER &= ~TIM_CCER_CC2NP;
     /* Enable capture */
-    TIM3->CCER |= TIM_CCER_CC2E;
+    TIMER_SPEED->CCER |= TIM_CCER_CC2E;
 
-    /* Enable interrupt request */
-    TIM3->DIER |= TIM_DIER_CC2IE;
+    /* Enable interrupt requests */
+    TIMER_SPEED->DIER |= TIM_DIER_TIE;
+    /* Enable capture interrupt request */
+    TIMER_SPEED->DIER |= TIM_DIER_CC2IE;
+    /* Enable update interrupt request */
+    TIMER_SPEED->DIER |= TIM_DIER_UIE;
+
     NVIC_ClearPendingIRQ(TIM3_IRQn);
     NVIC_EnableIRQ(TIM3_IRQn);
+
+    /* Start the timer */
+    TIMER_SPEED->CR1 |= TIM_CR1_CEN;
 }
 
 
