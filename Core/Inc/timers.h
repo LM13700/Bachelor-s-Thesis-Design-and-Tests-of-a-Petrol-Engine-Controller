@@ -16,16 +16,26 @@
 
 #include "stm32f411xe.h"
 
+#include "utils.h"
+
 /*===========================================================================*
  *
  * EXPORTED DEFINES AND MACRO SECTION
  *
  *===========================================================================*/
 
-#define TIMER_TIM_CLOCK     (SystemCoreClock)
+#define TIMER_TIM_CLOCK                         (SystemCoreClock)
 
-#define TIMER_SPEED         (TIM3)
-#define TIMER_IGNITION      (TIM2)
+#define TIMER_MS_IN_S                           (1000.0F)
+#define TIMER_MS_TO_TIMER_REG_VALUE(_MS_)       (Utils_FloatToUint32(((_MS_) / TIMER_MS_IN_S) * (float)TIMER_TIM_CLOCK))
+
+/* TIM3, TIM4 -> 16bit */
+/* TIM2, TIM5 -> 32bit */
+#define TIMER_IGNITION                          (TIM2)
+#define TIMER_SPEED                             (TIM3)
+#define TIMER_INJECTOR                          (TIM5)
+
+#define TIMER_SPEED_TIMER_MAX_VAL               (UINT16_MAX)
 
 /*===========================================================================*
  *

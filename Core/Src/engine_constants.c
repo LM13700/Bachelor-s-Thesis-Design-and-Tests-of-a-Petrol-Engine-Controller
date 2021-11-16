@@ -22,10 +22,10 @@
  *
  *===========================================================================*/
 
-#define ENGCON_SECONDS_IN_MINUTE                (60.0F)
+#define ENCON_SECONDS_IN_MINUTE                (60.0F)
 
-#define ENGCON_CALCULATE_RPM(_TIM_REG_VALUE_)   (ENGCON_SECONDS_IN_MINUTE * ((_TIM_REG_VALUE_) / TIMER_TIM_CLOCK) *    \
-                                                 ENGINE_CONST_TRIGGER_WHEEL_TEETH_NO)
+#define ENCON_CALCULATE_RPM(_TIM_REG_VALUE_)   (ENCON_SECONDS_IN_MINUTE * ((_TIM_REG_VALUE_) / TIMER_TIM_CLOCK) *    \
+                                                ENCON_TRIGGER_WHEEL_TEETH_NO)
 
 /*===========================================================================*
  *
@@ -40,12 +40,12 @@
  *===========================================================================*/
 
 /* Current engine angle in degrees, 0 means beginning of the first piston combustion stroke */
-static volatile float engcon_engine_angle = ENGINE_CONST_ANGLE_UNKNOWN;
+static volatile float encon_engine_angle = ENCON_ANGLE_UNKNOWN;
 /* Current engine raw speed value - obtained from input caputre timer registers difference */
 /* Conversion to RPM is done in this module to decrease execution time of TIM3 ISR */
-static uint32_t engcon_engine_speed_raw = ENGINE_CONST_SPEED_RAW_UNKNOWN;
+static uint32_t encon_engine_speed_raw = ENCON_SPEED_RAW_UNKNOWN;
 /* Calculated engine speed value in RPM */
-static float engcon_engine_speed_rpm = ENGINE_CONST_SPEED_UNKNOWN;
+static float encon_engine_speed_rpm = ENCON_SPEED_UNKNOWN;
 
 /*===========================================================================*
  *
@@ -60,57 +60,57 @@ static float engcon_engine_speed_rpm = ENGINE_CONST_SPEED_UNKNOWN;
  *===========================================================================*/
 
 /*===========================================================================*
- * Function: ENGCON_GetEngineAngle
+ * Function: EnCon_GetEngineAngle
  *===========================================================================*/
-float ENGCON_GetEngineAngle(void)
+float EnCon_GetEngineAngle(void)
 {
-    return engcon_engine_angle;
+    return encon_engine_angle;
 }
 
 /*===========================================================================*
- * Function: ENGCON_GetEngineSpeed
+ * Function: EnCon_GetEngineSpeed
  *===========================================================================*/
-float ENGCON_GetEngineSpeed(void)
+float EnCon_GetEngineSpeed(void)
 {
-    if (ENGINE_CONST_SPEED_RAW_UNKNOWN == engcon_engine_speed_raw)
+    if (ENCON_SPEED_RAW_UNKNOWN == encon_engine_speed_raw)
     {
-        engcon_engine_speed_rpm = ENGINE_CONST_SPEED_UNKNOWN;
+        encon_engine_speed_rpm = ENCON_SPEED_UNKNOWN;
     }
-    else if (ENGINE_CONST_SPEED_UNKNOWN == engcon_engine_speed_rpm)
+    else if (ENCON_SPEED_UNKNOWN == encon_engine_speed_rpm)
     {
-        engcon_engine_speed_rpm = ENGCON_CALCULATE_RPM(engcon_engine_speed_raw);
+        encon_engine_speed_rpm = ENGCON_CALCULATE_RPM(encon_engine_speed_raw);
     }
     else
     {
         /* Do nothing */
     }
 
-    return engcon_engine_speed_rpm;
+    return encon_engine_speed_rpm;
 }
 
 /*===========================================================================*
- * Function: ENGCON_GetEngineSpeedRaw
+ * Function: EnCon_GetEngineSpeedRaw
  *===========================================================================*/
-uint32_t ENGCON_GetEngineSpeedRaw(void)
+uint32_t EnCon_GetEngineSpeedRaw(void)
 {
-    return engcon_engine_speed_raw;
+    return encon_engine_speed_raw;
 }
 
 /*===========================================================================*
- * Function: ENGCON_UpdateEngineAngle
+ * Function: EnCon_UpdateEngineAngle
  *===========================================================================*/
-void ENGCON_UpdateEngineAngle(float angle)
+void EnCon_UpdateEngineAngle(float angle)
 {
-    engcon_engine_angle = angle;
+    encon_engine_angle = angle;
 }
 
 /*===========================================================================*
- * Function: ENGCON_UpdateEngineSpeed
+ * Function: EnCon_UpdateEngineSpeed
  *===========================================================================*/
-void ENGCON_UpdateEngineSpeed(uint32_t speed)
+void EnCon_UpdateEngineSpeed(uint32_t speed)
 {
-    engcon_engine_speed_raw = speed;
-    engcon_engine_speed_rpm = ENGINE_CONST_SPEED_UNKNOWN;
+    encon_engine_speed_raw = speed;
+    encon_engine_speed_rpm = ENCON_SPEED_UNKNOWN;
 }
 
 /*===========================================================================*

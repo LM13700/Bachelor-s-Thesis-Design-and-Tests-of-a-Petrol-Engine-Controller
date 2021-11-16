@@ -22,25 +22,25 @@
  *
  *===========================================================================*/
 
-#define ENGINE_CONST_ANGLE_UNKNOWN                     (FLT_MAX)
-#define ENGINE_CONST_SPEED_UNKNOWN                     (FLT_MAX)
-#define ENGINE_CONST_SPEED_RAW_UNKNOWN                 (UINT32_MAX)
+#define ENCON_ANGLE_UNKNOWN                     (FLT_MAX)
+#define ENCON_SPEED_UNKNOWN                     (FLT_MAX)
+#define ENCON_SPEED_RAW_UNKNOWN                 (UINT32_MAX)
 
-#define ENGINE_CONST_ENGINE_FULL_CYCLE_ANGLE           (720.0F)
-#define ENGINE_CONST_ENGINE_ONE_ROTATION_ANGLE         (360.0F)
-#define ENGINE_CONST_ENGINE_PISTONS_NO                 (3u)
+#define ENCON_ENGINE_FULL_CYCLE_ANGLE           (720.0F)
+#define ENCON_ENGINE_ONE_ROTATION_ANGLE         (360.0F)
+#define ENCON_ENGINE_PISTONS_NO                 (3u)
 
 /* Angle of engine used for synchronisation */
 /* This angle is set at first speed signal after sync signal */
-#define ENGINE_CONST_TRIGGER_ANGLE                     (180.0F)
+#define ENCON_TRIGGER_ANGLE                     (180.0F)
 /* This is number of trigger wheel teeth spinning with crank speed */
 /* Wheel spins with cam speed (2 x crank speed), so real number is divided by 2 */
-#define ENGINE_CONST_TRIGGER_WHEEL_TEETH_NO            (30.0F)
+#define ENCON_TRIGGER_WHEEL_TEETH_NO            (30.0F)
 
-#define ENGINE_CONST_ONE_TRIGGER_PULSE_ANGLE           (ENGINE_CONST_ENGINE_ONE_ROTATION_ANGLE /    \
-                                                        ENGINE_CONST_TRIGGER_WHEEL_TEETH_NO)
+#define ENCON_ONE_TRIGGER_PULSE_ANGLE           (ENCON_ENGINE_ONE_ROTATION_ANGLE /    \
+                                                 ENCON_TRIGGER_WHEEL_TEETH_NO)
 
-#define ENGINE_CONST_IGINITON_DWELL_TIME_MS            (7.0F)
+#define ENCON_COILS_DWELL_TIME_MS               (7.0F)
 
 /*===========================================================================*
  *
@@ -67,7 +67,7 @@
  * return:      float - engine angle in degrees
  * details:     0 degrees means beginning of the first piston combustion stroke
  *===========================================================================*/
-float ENGCON_GetEngineAngle(void);
+float EnCon_GetEngineAngle(void);
 
 /*===========================================================================*
  * brief:       Get current engine speed
@@ -76,7 +76,7 @@ float ENGCON_GetEngineAngle(void);
  * return:      float - engine speed in RPM
  * details:     None
  *===========================================================================*/
-float ENGCON_GetEngineSpeed(void);
+float EnCon_GetEngineSpeed(void);
 
 /*===========================================================================*
  * brief:       Get current raw engine speed
@@ -85,7 +85,7 @@ float ENGCON_GetEngineSpeed(void);
  * return:      uint32_t - engine speed in raw register value
  * details:     None
  *===========================================================================*/
-uint32_t ENGCON_GetEngineSpeedRaw(void);
+uint32_t EnCon_GetEngineSpeedRaw(void);
 
 /*===========================================================================*
  * brief:       Update engine angle
@@ -94,7 +94,7 @@ uint32_t ENGCON_GetEngineSpeedRaw(void);
  * return:      None
  * details:     None
  *===========================================================================*/
-void ENGCON_UpdateEngineAngle(float angle);
+void EnCon_UpdateEngineAngle(float angle);
 
 /*===========================================================================*
  * brief:       Get current engine speed
@@ -103,7 +103,7 @@ void ENGCON_UpdateEngineAngle(float angle);
  * return:      None
  * details:     None
  *===========================================================================*/
-void ENGCON_UpdateEngineSpeed(uint32_t speed);
+void EnCon_UpdateEngineSpeed(uint32_t speed);
 
 
 #endif

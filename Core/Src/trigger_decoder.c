@@ -26,7 +26,6 @@ SWO_DefineModuleTag(TRIGD);
  *
  *===========================================================================*/
 
-#define TRIGD_SPEED_TIMER_MAX_VAL               (UINT16_MAX)
 #define TRIGD_SPEED_TIMER_REGISTER              (TIMER_SPEED->CCR2)
 
 /*===========================================================================*
@@ -77,7 +76,7 @@ extern void TIM3_IRQHandler(void);
  * return:      None
  * details:     None
  *===========================================================================*/
-static void TRIGD_SyncPinInit(void);
+static void TrigD_SyncPinInit(void);
 
 /*===========================================================================*
  * brief:       Initialize speed input pin
@@ -86,7 +85,7 @@ static void TRIGD_SyncPinInit(void);
  * return:      None
  * details:     None
  *===========================================================================*/
-static void TRIGD_SpeedPinInit(void);
+static void TrigD_SpeedPinInit(void);
 
 /*===========================================================================*
  *
@@ -95,15 +94,15 @@ static void TRIGD_SpeedPinInit(void);
  *===========================================================================*/
 
 /*===========================================================================*
- * Function: TRIGD_Init
+ * Function: TrigD_Init
  *===========================================================================*/
-void TRIGD_Init()
+void TrigD_Init()
 {
-    trigd_engine_angle = ENGINE_CONST_ANGLE_UNKNOWN;
+    trigd_engine_angle = ENCON_ANGLE_UNKNOWN;
     trigd_is_sync_pending = false;
 
-    TRIGD_SyncPinInit();
-    TRIGD_SpeedPinInit();
+    TrigD_SyncPinInit();
+    TrigD_SpeedPinInit();
 }
 
 /*===========================================================================*
@@ -143,28 +142,28 @@ void TIM3_IRQHandler(void)
 
         if (isLastValueCaptured)
         {
-            ENGCON_UpdateEngineSpeed(UTILS_CIRCULAR_DIFFERENCE(TRIGD_SPEED_TIMER_REGISTER, lastCapturedValue,
-                                     TRIGD_SPEED_TIMER_MAX_VAL));
+            EnCon_UpdateEngineSpeed(UTILS_CIRCULAR_DIFFERENCE(TRIGD_SPEED_TIMER_REGISTER, lastCapturedValue,
+                                    TIMER_SPEED_TIMER_MAX_VAL));
         }
 
         if (trigd_is_sync_pending)
         {
-            trigd_engine_angle = ENGINE_CONST_TRIGGER_ANGLE;
+            trigd_engine_angle = ENCON_TRIGGER_ANGLE;
             trigd_is_sync_pending = false;
         }
         else
         {
-            if (trigd_engine_angle != ENGINE_CONST_ANGLE_UNKNOWN)
+            if (trigd_engine_angle != ENCON_ANGLE_UNKNOWN)
             {
-                trigd_engine_angle += (ENGINE_CONST_ONE_TRIGGER_PULSE_ANGLE);
-                if (trigd_engine_angle >= ENGINE_CONST_ENGINE_FULL_CYCLE_ANGLE)
+                trigd_engine_angle += (ENCON_ONE_TRIGGER_PULSE_ANGLE);
+                if (trigd_engine_angle >= ENCON_ENGINE_FULL_CYCLE_ANGLE)
                 {
-                    trigd_engine_angle -= ENGINE_CONST_ENGINE_FULL_CYCLE_ANGLE;
+                    trigd_engine_angle -= ENCON_ENGINE_FULL_CYCLE_ANGLE;
                 }
             }
         }
 
-        ENGCON_UpdateEngineAngle(trigd_engine_angle);
+        EnCon_UpdateEngineAngle(trigd_engine_angle);
         lastCapturedValue = TRIGD_SPEED_TIMER_REGISTER;
         isLastValueCaptured = true;
     }
@@ -174,9 +173,9 @@ void TIM3_IRQHandler(void)
         /* Clear interrupt flag */
         TIMER_SPEED->SR &= ~TIM_SR_UIF;
         isLastValueCaptured = false;
-        trigd_engine_angle = ENGINE_CONST_ANGLE_UNKNOWN;
-        ENGCON_UpdateEngineAngle(trigd_engine_angle);
-        ENGCON_UpdateEngineSpeed(ENGINE_CONST_SPEED_RAW_UNKNOWN);
+        trigd_engine_angle = ENCON_ANGLE_UNKNOWN;
+        EnCon_UpdateEngineAngle(trigd_engine_angle);
+        EnCon_UpdateEngineSpeed(ENCON_SPEED_RAW_UNKNOWN);
     }
     else
     {
@@ -188,9 +187,9 @@ void TIM3_IRQHandler(void)
 }
 
 /*===========================================================================*
- * Function: TRIGD_SyncPinInit
+ * Function: TrigD_SyncPinInit
  *===========================================================================*/
-static void TRIGD_SyncPinInit(void)
+static void TrigD_SyncPinInit(void)
 {
     /* Sync input pin: PA0 */
 
@@ -217,9 +216,9 @@ static void TRIGD_SyncPinInit(void)
 }
 
 /*===========================================================================*
- * Function: TRIGD_SpeedPinInit
+ * Function: TrigD_SpeedPinInit
  *===========================================================================*/
-static void TRIGD_SpeedPinInit(void)
+static void TrigD_SpeedPinInit(void)
 {
     /* Speed input pin: PA6 */
     /* Speed input timer: TIM3 CH1 */

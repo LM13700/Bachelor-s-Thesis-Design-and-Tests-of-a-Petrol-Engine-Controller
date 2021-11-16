@@ -28,14 +28,14 @@
  *
  *===========================================================================*/
 
-typedef enum IgDrv_IgnitionChannels_Tag
+typedef enum IgnDrv_IgnitionChannels_Tag
 {
     IGNDRV_CHANNEL_1,
     IGNDRV_CHANNEL_2,
     IGNDRV_CHANNEL_3,
 
-    IGDRV_CHANNEL_COUNT
-} IgDrv_IgnitionChannels_T;
+    IGNDRV_CHANNEL_COUNT
+} IgnDrv_IgnitionChannels_T;
 
 /*===========================================================================*
  *
@@ -56,27 +56,27 @@ typedef enum IgDrv_IgnitionChannels_Tag
  * return:      None
  * details:     None
  *===========================================================================*/
-void IGNDRV_Init(void);
+void IgnDrv_Init(void);
 
 /*===========================================================================*
  * brief:       Prepere ignition channel
  * param[in]:   channel - ignition channel to be prepared
  * param[in]:   fireAngle - engine angle at which ignition need to occure
- * param[in]:   startAngle - engine angle at which timer will be started
+ * param[in]:   startAngle - engine angle at which module will be started
  * param[out]:  None
  * return:      None
  * details:     None
  *===========================================================================*/
-void IGNDRV_PrepareIgnitionChannel(IgDrv_IgnitionChannels_T channel, float fireAngle, float startAngle);
+void IgnDrv_PrepareIgnitionChannel(IgnDrv_IgnitionChannels_T channel, float fireAngle, float startAngle);
 
 /*===========================================================================*
- * brief:       Starts ignition timer
- * param[in]:   channel - channel which will be fired
+ * brief:       Starts ignition module
+ * param[in]:   channel - channel which will be started
  * param[out]:  None
  * return:      None
  * details:     It is necessary to previously prepare proper channel via prepare function
  *===========================================================================*/
-void IGNDRV_StartIgnitionModule(IgDrv_IgnitionChannels_T channel);
+void IgnDrv_StartIgnitionModul(IgnDrv_IgnitionChannels_T channel);
 
 
 #endif

@@ -15,6 +15,7 @@
 #include "main.h"
 
 #include "ignition_driver.h"
+#include "injection_driver.h"
 #include "swo.h"
 #include "trigger_decoder.h"
 
@@ -51,7 +52,7 @@ SWO_DefineModuleTag(MAIN);
  * return:      None
  * details:     None
  *===========================================================================*/
-void MAIN_CallInits(void);
+void Main_CallInits(void);
 
 /*===========================================================================*
  *
@@ -64,7 +65,7 @@ void MAIN_CallInits(void);
  *===========================================================================*/
 int main(void)
 {
-    MAIN_CallInits();
+    Main_CallInits();
 
     while(1)
     {
@@ -79,13 +80,14 @@ int main(void)
  *===========================================================================*/
 
 /*===========================================================================*
- * Function: MAIN_CallInits
+ * Function: Main_CallInits
  *===========================================================================*/
-void MAIN_CallInits(void)
+void Main_CallInits(void)
 {
     SWO_Init();
-    TRIGD_Init();
-    IGNDRV_Init();
+    TrigD_Init();
+    IgnDrv_Init();
+    InjDrv_Init();
 }
 
 
