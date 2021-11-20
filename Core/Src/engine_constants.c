@@ -78,7 +78,7 @@ float EnCon_GetEngineSpeed(void)
     }
     else if (ENCON_SPEED_UNKNOWN == encon_engine_speed_rpm)
     {
-        encon_engine_speed_rpm = ENGCON_CALCULATE_RPM(encon_engine_speed_raw);
+        encon_engine_speed_rpm = ENCON_CALCULATE_RPM(encon_engine_speed_raw);
     }
     else
     {

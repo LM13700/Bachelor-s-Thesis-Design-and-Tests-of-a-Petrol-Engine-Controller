@@ -28,6 +28,8 @@
  *
  *===========================================================================*/
 
+typedef void (*Trigd_IsrCallback)(void);
+
 /*===========================================================================*
  *
  * EXPORTED GLOBAL VARIABLES SECTION
@@ -42,12 +44,12 @@
 
 /*===========================================================================*
  * brief:       Initialize trigger decode module
- * param[in]:   None
+ * param[in]:   callback - a pointer to the trigger callback function
  * param[out]:  None
  * return:      None
  * details:     None
  *===========================================================================*/
-void TrigD_Init(void);
+void TrigD_Init(Trigd_IsrCallback callback);
 
 
 #endif

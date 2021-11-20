@@ -1,10 +1,12 @@
 /*===========================================================================*
- * File:        main.c
+ * File:        speed_density.h
  * Project:     ECU
- * Author:      Mateusz Mróz
- * Date:        06.09.2021
- * Brief:       Main.c
+ * Author:      Mateusz Mroz
+ * Date:        20.11.2021
+ * Brief:       Module containing speed density method calculations
  *===========================================================================*/
+#ifndef _SPEED_DENSITY_H_
+#define _SPEED_DENSITY_H_
 
 /*===========================================================================*
  *
@@ -12,84 +14,48 @@
  *
  *===========================================================================*/
 
-#include "main.h"
-
-#include "ignition_driver.h"
-#include "injection_driver.h"
-#include "swo.h"
-#include "speed_density.h"
-#include "trigger_decoder.h"
-
-SWO_DefineModuleTag(MAIN);
-
 /*===========================================================================*
  *
- * DEFINES AND MACRO SECTION
+ * EXPORTED DEFINES AND MACRO SECTION
  *
  *===========================================================================*/
 
 /*===========================================================================*
  *
- * LOCAL TYPES AND ENUMERATION SECTION
+ * EXPORTED TYPES AND ENUMERATION SECTION
  *
  *===========================================================================*/
 
 /*===========================================================================*
  *
- * GLOBAL VARIABLES AND CONSTANTS SECTION
+ * EXPORTED GLOBAL VARIABLES SECTION
  *
  *===========================================================================*/
 
 /*===========================================================================*
  *
- * LOCAL FUNCTION DECLARATION SECTION
+ * EXPORTED FUNCTION DECLARATION SECTION
  *
  *===========================================================================*/
 
 /*===========================================================================*
- * brief:       Function calling initializing functions
+ * brief:       Function called after trigger interrupt
  * param[in]:   None
  * param[out]:  None
  * return:      None
  * details:     None
  *===========================================================================*/
-void Main_CallInits(void);
+void SpeedDensity_OnTriggerInterrupt(void);
 
 /*===========================================================================*
- *
- * FUNCTION DEFINITION SECTION
- *
+ * brief:       Trigger ISR callback
+ * param[in]:   None
+ * param[out]:  None
+ * return:      None
+ * details:     None
  *===========================================================================*/
-
-/*===========================================================================*
- * Function: main
- *===========================================================================*/
-int main(void)
-{
-    Main_CallInits();
-
-    while(1)
-    {
-        WaitForInterrupt();
-    }
-}
-
-/*===========================================================================*
- *
- * LOCAL FUNCTION DEFINITION SECTION
- *
- *===========================================================================*/
-
-/*===========================================================================*
- * Function: Main_CallInits
- *===========================================================================*/
-void Main_CallInits(void)
-{
-    SWO_Init();
-    TrigD_Init();
-    IgnDrv_Init();
-    InjDrv_Init();
-}
+void SpeedDensity_TriggerCallback(void);
 
 
+#endif
 /* end of file */

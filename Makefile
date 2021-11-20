@@ -25,7 +25,9 @@ Core/Src/engine_constants.c \
 Core/Src/ignition_driver.c \
 Core/Src/injection_driver.c \
 Core/Src/main.c \
+Core/Src/speed_density.c \
 Core/Src/swo.c \
+Core/Src/tables.c \
 Core/Src/trigger_decoder.c \
 Core/Src/utils.c \
 

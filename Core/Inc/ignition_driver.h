@@ -76,7 +76,7 @@ void IgnDrv_PrepareIgnitionChannel(IgnDrv_IgnitionChannels_T channel, float fire
  * return:      None
  * details:     It is necessary to previously prepare proper channel via prepare function
  *===========================================================================*/
-void IgnDrv_StartIgnitionModul(IgnDrv_IgnitionChannels_T channel);
+void IgnDrv_StartIgnitionModule(IgnDrv_IgnitionChannels_T channel);
 
 
 #endif

@@ -39,6 +39,8 @@ static volatile float trigd_engine_angle;
 /* Flag set when sync signal was received */
 static volatile bool trigd_is_sync_pending;
 
+static volatile Trigd_IsrCallback trigd_trigger_callback;
+
 /*===========================================================================*
  *
  * GLOBAL VARIABLES AND CONSTANTS SECTION
@@ -96,7 +98,7 @@ static void TrigD_SpeedPinInit(void);
 /*===========================================================================*
  * Function: TrigD_Init
  *===========================================================================*/
-void TrigD_Init()
+void TrigD_Init(Trigd_IsrCallback callback)
 {
     trigd_engine_angle = ENCON_ANGLE_UNKNOWN;
     trigd_is_sync_pending = false;
