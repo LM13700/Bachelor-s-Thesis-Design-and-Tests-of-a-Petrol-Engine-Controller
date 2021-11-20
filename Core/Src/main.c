@@ -40,6 +40,8 @@ SWO_DefineModuleTag(MAIN);
  *
  *===========================================================================*/
 
+volatile bool main_is_speed_trigger_occured;
+
 /*===========================================================================*
  *
  * LOCAL FUNCTION DECLARATION SECTION
@@ -71,6 +73,11 @@ int main(void)
     while(1)
     {
         WaitForInterrupt();
+        if (main_is_speed_trigger_occured)
+        {
+            SpeedDensity_OnTriggerInterrupt();
+            main_is_speed_trigger_occured = false;
+        }
     }
 }
 
@@ -85,10 +92,17 @@ int main(void)
  *===========================================================================*/
 void Main_CallInits(void)
 {
+    DisableIRQ();
+
     SWO_Init();
-    TrigD_Init();
+    TrigD_Init(SpeedDensity_TriggerCallback);
     IgnDrv_Init();
     InjDrv_Init();
+    SpeedDensity_Init();
+
+    main_is_speed_trigger_occured = false;
+
+    EnableIRQ();
 }
 
 

@@ -92,6 +92,7 @@ void InjDrv_Init(void)
     /* Enable update interrupt request */
     TIMER_INJECTOR->DIER |= TIM_DIER_UIE;
 
+    NVIC_SetPriority(TIM5_IRQn, 1U);
     NVIC_ClearPendingIRQ(TIM5_IRQn);
     NVIC_EnableIRQ(TIM5_IRQn);
 }

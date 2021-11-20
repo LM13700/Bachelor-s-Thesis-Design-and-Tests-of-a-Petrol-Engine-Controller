@@ -41,6 +41,8 @@ static volatile bool trigd_is_sync_pending;
 
 static volatile Trigd_IsrCallback trigd_trigger_callback;
 
+extern bool main_is_speed_trigger_occured;
+
 /*===========================================================================*
  *
  * GLOBAL VARIABLES AND CONSTANTS SECTION
@@ -103,6 +105,11 @@ void TrigD_Init(Trigd_IsrCallback callback)
     trigd_engine_angle = ENCON_ANGLE_UNKNOWN;
     trigd_is_sync_pending = false;
 
+    if (callback != NULL)
+    {
+        trigd_trigger_callback = callback;
+    }
+
     TrigD_SyncPinInit();
     TrigD_SpeedPinInit();
 }
@@ -133,12 +140,12 @@ void TIM3_IRQHandler(void)
     static bool isLastValueCaptured = false;
     static uint32_t lastCapturedValue;
 
-    /* Disable interrupts */
-    __disable_irq();
-
     /* Capture interrupt */
     if (TIMER_SPEED->SR & TIM_SR_CC2IF)
     {
+        /* Start scheduled actions */
+        trigd_trigger_callback();
+
         /* Clear interrupt flag */
         TIMER_SPEED->SR &= ~TIM_SR_CC2IF;
 
@@ -168,6 +175,7 @@ void TIM3_IRQHandler(void)
         EnCon_UpdateEngineAngle(trigd_engine_angle);
         lastCapturedValue = TRIGD_SPEED_TIMER_REGISTER;
         isLastValueCaptured = true;
+        main_is_speed_trigger_occured = true;
     }
     /* Overflow interrupt */
     else if (TIMER_SPEED->SR & TIM_SR_UIF)
@@ -183,9 +191,6 @@ void TIM3_IRQHandler(void)
     {
         /* Do nothing*/
     }
-
-    /* Enable interrupts */
-    __enable_irq();
 }
 
 /*===========================================================================*
@@ -212,6 +217,7 @@ static void TrigD_SyncPinInit(void)
     EXTI->FTSR |= EXTI_FTSR_TR0;
 
     /* Enable interrupt request */
+    NVIC_SetPriority(EXTI0_IRQn, 1U);
     EXTI_ClearPendingTrigger(EXTI_PR_PR0);
     NVIC_ClearPendingIRQ(EXTI0_IRQn);
     NVIC_EnableIRQ(EXTI0_IRQn);
@@ -252,6 +258,7 @@ static void TrigD_SpeedPinInit(void)
     /* Enable update interrupt request */
     TIMER_SPEED->DIER |= TIM_DIER_UIE;
 
+    NVIC_SetPriority(TIM3_IRQn, 0U);
     NVIC_ClearPendingIRQ(TIM3_IRQn);
     NVIC_EnableIRQ(TIM3_IRQn);
 

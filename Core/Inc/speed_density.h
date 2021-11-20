@@ -39,6 +39,15 @@
  *===========================================================================*/
 
 /*===========================================================================*
+ * brief:       Initialize speed density module
+ * param[in]:   None
+ * param[out]:  None
+ * return:      None
+ * details:     None
+ *===========================================================================*/
+void SpeedDensity_Init(void);
+
+/*===========================================================================*
  * brief:       Function called after trigger interrupt
  * param[in]:   None
  * param[out]:  None
