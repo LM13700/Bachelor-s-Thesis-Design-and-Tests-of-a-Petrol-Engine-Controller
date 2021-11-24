@@ -16,6 +16,8 @@
 
 #include "common_include.h"
 
+#include "engine_constants.h"
+
 /*===========================================================================*
  *
  * EXPORTED DEFINES AND MACRO SECTION
@@ -27,15 +29,6 @@
  * EXPORTED TYPES AND ENUMERATION SECTION
  *
  *===========================================================================*/
-
-typedef enum InjDrv_InjectionChannels_Tag
-{
-    INJDRV_CHANNEL_1,
-    INJDRV_CHANNEL_2,
-    INJDRV_CHANNEL_3,
-
-    INJDRV_CHANNEL_COUNT
-} InjDrv_InjectionChannels_T;
 
 /*===========================================================================*
  *
@@ -68,7 +61,7 @@ void InjDrv_Init(void);
  * return:      None
  * details:     None
  *===========================================================================*/
-void InjDrv_PrepareInjectionChannel(InjDrv_InjectionChannels_T channel, float injAngle, float startAngle,
+void InjDrv_PrepareInjectionChannel(EnCon_CylinderChannels_T channel, float injAngle, float startAngle,
                                     float injOpenTimeMs);
 
 /*===========================================================================*
@@ -78,7 +71,7 @@ void InjDrv_PrepareInjectionChannel(InjDrv_InjectionChannels_T channel, float in
  * return:      None
  * details:     It is necessary to previously prepare proper channel via prepare function
  *===========================================================================*/
-void InjDrv_StartInjectionModule(InjDrv_InjectionChannels_T channel);
+void InjDrv_StartInjectionModule(EnCon_CylinderChannels_T channel);
 
 
 #endif

@@ -45,7 +45,7 @@
  * return:      None
  * details:     None
  *===========================================================================*/
-void SpeedDensity_Init(void);
+void SpDen_Init(void);
 
 /*===========================================================================*
  * brief:       Function called after trigger interrupt
@@ -54,7 +54,7 @@ void SpeedDensity_Init(void);
  * return:      None
  * details:     None
  *===========================================================================*/
-void SpeedDensity_OnTriggerInterrupt(void);
+void SpDen_OnTriggerInterrupt(void);
 
 /*===========================================================================*
  * brief:       Trigger ISR callback
@@ -63,7 +63,7 @@ void SpeedDensity_OnTriggerInterrupt(void);
  * return:      None
  * details:     None
  *===========================================================================*/
-void SpeedDensity_TriggerCallback(void);
+void SpDen_TriggerCallback(void);
 
 
 #endif

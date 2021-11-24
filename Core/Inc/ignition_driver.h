@@ -16,6 +16,8 @@
 
 #include "common_include.h"
 
+#include "engine_constants.h"
+
 /*===========================================================================*
  *
  * EXPORTED DEFINES AND MACRO SECTION
@@ -27,15 +29,6 @@
  * EXPORTED TYPES AND ENUMERATION SECTION
  *
  *===========================================================================*/
-
-typedef enum IgnDrv_IgnitionChannels_Tag
-{
-    IGNDRV_CHANNEL_1,
-    IGNDRV_CHANNEL_2,
-    IGNDRV_CHANNEL_3,
-
-    IGNDRV_CHANNEL_COUNT
-} IgnDrv_IgnitionChannels_T;
 
 /*===========================================================================*
  *
@@ -67,7 +60,7 @@ void IgnDrv_Init(void);
  * return:      None
  * details:     None
  *===========================================================================*/
-void IgnDrv_PrepareIgnitionChannel(IgnDrv_IgnitionChannels_T channel, float fireAngle, float startAngle);
+void IgnDrv_PrepareIgnitionChannel(EnCon_CylinderChannels_T channel, float fireAngle, float startAngle);
 
 /*===========================================================================*
  * brief:       Starts ignition module
@@ -76,7 +69,7 @@ void IgnDrv_PrepareIgnitionChannel(IgnDrv_IgnitionChannels_T channel, float fire
  * return:      None
  * details:     It is necessary to previously prepare proper channel via prepare function
  *===========================================================================*/
-void IgnDrv_StartIgnitionModule(IgnDrv_IgnitionChannels_T channel);
+void IgnDrv_StartIgnitionModule(EnCon_CylinderChannels_T channel);
 
 
 #endif

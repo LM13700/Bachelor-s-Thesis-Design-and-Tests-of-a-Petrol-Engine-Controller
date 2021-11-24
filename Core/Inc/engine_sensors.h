@@ -1,10 +1,12 @@
 /*===========================================================================*
- * File:        main.c
+ * File:        engine_sensors.h
  * Project:     ECU
- * Author:      Mateusz Mróz
- * Date:        06.09.2021
- * Brief:       Main.c
+ * Author:      Mateusz Mroz
+ * Date:        23.11.2021
+ * Brief:       Module containing sensors support
  *===========================================================================*/
+#ifndef _ENGINE_SENSORS_H_
+#define _ENGINE_SENSORS_H_
 
 /*===========================================================================*
  *
@@ -12,98 +14,76 @@
  *
  *===========================================================================*/
 
-#include "main.h"
-
-#include "ignition_driver.h"
-#include "injection_driver.h"
-#include "swo.h"
-#include "speed_density.h"
-#include "trigger_decoder.h"
-
-SWO_DefineModuleTag(MAIN);
-
 /*===========================================================================*
  *
- * DEFINES AND MACRO SECTION
+ * EXPORTED DEFINES AND MACRO SECTION
  *
  *===========================================================================*/
 
 /*===========================================================================*
  *
- * LOCAL TYPES AND ENUMERATION SECTION
+ * EXPORTED TYPES AND ENUMERATION SECTION
+ *
+ *===========================================================================*/
+
+typedef enum EnSens_CltResultType_Tag
+{
+    /* Temperature in Kelvin */
+    ENSENS_CLT_RESULT_TYPE_TEMPERATURE,
+    /* Enrichement percentage */
+    ENSENS_CLT_RESULT_TYPE_ENRICHEMENT,
+
+    ENSENS_CLT_RESULT_TYPE_COUNT
+} EnSens_CltResultTypes_T;
+
+/*===========================================================================*
+ *
+ * EXPORTED GLOBAL VARIABLES SECTION
  *
  *===========================================================================*/
 
 /*===========================================================================*
  *
- * GLOBAL VARIABLES AND CONSTANTS SECTION
- *
- *===========================================================================*/
-
-volatile bool main_is_speed_trigger_occured;
-
-/*===========================================================================*
- *
- * LOCAL FUNCTION DECLARATION SECTION
+ * EXPORTED FUNCTION DECLARATION SECTION
  *
  *===========================================================================*/
 
 /*===========================================================================*
- * brief:       Function calling initializing functions
+ * brief:       Gets MAP value
  * param[in]:   None
  * param[out]:  None
- * return:      None
+ * return:      float - absolute MAP value in kPa
+ * details:     MAP - Manifold Absolute Pressure
+ *===========================================================================*/
+float EnSens_GetMap(void);
+
+/*===========================================================================*
+ * brief:       Gets IAT value
+ * param[in]:   None
+ * param[out]:  None
+ * return:      float - IAT value in kelvins
+ * details:     IAT - Intake Air Temperature
+ *===========================================================================*/
+float EnSens_GetIat(void);
+
+/*===========================================================================*
+ * brief:       Gets CLT specified value
+ * param[in]:   resultType - what type of result will be returned
+ * param[out]:  None
+ * return:      float - value described in "EnSens_CltResultTypes_T" declaration
+ * details:     CLT - Coolant Temperature
+ *===========================================================================*/
+float EnSens_GetClt(EnSens_CltResultTypes_T resultType);
+
+/*===========================================================================*
+ * brief:       Gets oil pressure
+ * param[in]:   None
+ * param[out]:  None
+ * return:      float - oil pressure in kPa
  * details:     None
  *===========================================================================*/
-void Main_CallInits(void);
-
-/*===========================================================================*
- *
- * FUNCTION DEFINITION SECTION
- *
- *===========================================================================*/
-
-/*===========================================================================*
- * Function: main
- *===========================================================================*/
-int main(void)
-{
-    Main_CallInits();
-
-    while(1)
-    {
-        WaitForInterrupt();
-        if (main_is_speed_trigger_occured)
-        {
-            SpDen_OnTriggerInterrupt();
-            main_is_speed_trigger_occured = false;
-        }
-    }
-}
-
-/*===========================================================================*
- *
- * LOCAL FUNCTION DEFINITION SECTION
- *
- *===========================================================================*/
-
-/*===========================================================================*
- * Function: Main_CallInits
- *===========================================================================*/
-void Main_CallInits(void)
-{
-    DisableIRQ();
-
-    SWO_Init();
-    TrigD_Init(SpDen_TriggerCallback);
-    IgnDrv_Init();
-    InjDrv_Init();
-    SpDen_Init();
-
-    main_is_speed_trigger_occured = false;
-
-    EnableIRQ();
-}
+// float EnSens_GetOilPressure(void);
 
 
+#endif
 /* end of file */

@@ -140,6 +140,8 @@ void TIM3_IRQHandler(void)
     static bool isLastValueCaptured = false;
     static uint32_t lastCapturedValue;
 
+    main_is_speed_trigger_occured = true;
+
     /* Capture interrupt */
     if (TIMER_SPEED->SR & TIM_SR_CC2IF)
     {
@@ -175,7 +177,6 @@ void TIM3_IRQHandler(void)
         EnCon_UpdateEngineAngle(trigd_engine_angle);
         lastCapturedValue = TRIGD_SPEED_TIMER_REGISTER;
         isLastValueCaptured = true;
-        main_is_speed_trigger_occured = true;
     }
     /* Overflow interrupt */
     else if (TIMER_SPEED->SR & TIM_SR_UIF)

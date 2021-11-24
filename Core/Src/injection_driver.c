@@ -100,7 +100,7 @@ void InjDrv_Init(void)
 /*===========================================================================*
  * Function: InjDrv_PrepareInjectionChannel
  *===========================================================================*/
-void InjDrv_PrepareInjectionChannel(InjDrv_InjectionChannels_T channel, float injAngle, float startAngle,
+void InjDrv_PrepareInjectionChannel(EnCon_CylinderChannels_T channel, float injAngle, float startAngle,
                                     float injOpenTimeMs)
 {
     float engineSpeedRaw;
@@ -128,15 +128,15 @@ void InjDrv_PrepareInjectionChannel(InjDrv_InjectionChannels_T channel, float in
 
     switch (channel)
     {
-        case INJDRV_CHANNEL_1:
+        case ENCON_CHANNEL_1:
             TIMER_INJECTOR->CCR2 |= tmpDelay;
             break;
 
-        case INJDRV_CHANNEL_2:
+        case ENCON_CHANNEL_2:
             TIMER_INJECTOR->CCR3 |= tmpDelay;
             break;
 
-        case INJDRV_CHANNEL_3:
+        case ENCON_CHANNEL_3:
             TIMER_INJECTOR->CCR4 |= tmpDelay;
             break;
 
@@ -152,19 +152,19 @@ injdrv_prepare_injection_channel_exit:
 /*===========================================================================*
  * Function: InjDrv_StartInjectionModule
  *===========================================================================*/
-void InjDrv_StartInjectionModule(InjDrv_InjectionChannels_T channel)
+void InjDrv_StartInjectionModule(EnCon_CylinderChannels_T channel)
 {
     switch (channel)
     {
-        case INJDRV_CHANNEL_1:
+        case ENCON_CHANNEL_1:
             INJDRV_ENABLE_INJECTION_CHANNEL_1;
             break;
 
-        case INJDRV_CHANNEL_2:
+        case ENCON_CHANNEL_2:
             INJDRV_ENABLE_INJECTION_CHANNEL_2;
             break;
 
-        case INJDRV_CHANNEL_3:
+        case ENCON_CHANNEL_3:
             INJDRV_ENABLE_INJECTION_CHANNEL_3;
             break;
 

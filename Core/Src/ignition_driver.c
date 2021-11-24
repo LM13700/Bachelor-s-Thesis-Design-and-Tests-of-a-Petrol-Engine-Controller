@@ -100,7 +100,7 @@ void IgnDrv_Init(void)
 /*===========================================================================*
  * Function: IgnDrv_PrepareIgnitionChannel
  *===========================================================================*/
-void IgnDrv_PrepareIgnitionChannel(IgnDrv_IgnitionChannels_T channel, float fireAngle, float startAngle)
+void IgnDrv_PrepareIgnitionChannel(EnCon_CylinderChannels_T channel, float fireAngle, float startAngle)
 {
     float engineSpeedRaw;
     float angleDifference;
@@ -125,15 +125,15 @@ void IgnDrv_PrepareIgnitionChannel(IgnDrv_IgnitionChannels_T channel, float fire
 
     switch (channel)
     {
-        case IGNDRV_CHANNEL_1:
+        case ENCON_CHANNEL_1:
             TIMER_IGNITION->CCR2 |= tmpDelay;
             break;
 
-        case IGNDRV_CHANNEL_2:
+        case ENCON_CHANNEL_2:
             TIMER_IGNITION->CCR3 |= tmpDelay;
             break;
 
-        case IGNDRV_CHANNEL_3:
+        case ENCON_CHANNEL_3:
             TIMER_IGNITION->CCR4 |= tmpDelay;
             break;
 
@@ -149,19 +149,19 @@ igndrv_prepare_ignition_channel_exit:
 /*===========================================================================*
  * Function: IGNDRV_StartIgnitionModule
  *===========================================================================*/
-void IgnDrv_StartIgnitionModule(IgnDrv_IgnitionChannels_T channel)
+void IgnDrv_StartIgnitionModule(EnCon_CylinderChannels_T channel)
 {
     switch (channel)
     {
-        case IGNDRV_CHANNEL_1:
+        case ENCON_CHANNEL_1:
             IGNDRV_ENABLE_IGNITION_CHANNEL_1;
             break;
 
-        case IGNDRV_CHANNEL_2:
+        case ENCON_CHANNEL_2:
             IGNDRV_ENABLE_IGNITION_CHANNEL_2;
             break;
 
-        case IGNDRV_CHANNEL_3:
+        case ENCON_CHANNEL_3:
             IGNDRV_ENABLE_IGNITION_CHANNEL_3;
             break;
 

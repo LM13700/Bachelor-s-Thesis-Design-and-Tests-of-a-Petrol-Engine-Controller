@@ -22,6 +22,7 @@ RM := del /q
 C_SOURCES =  \
 Core/Src/system_stm32f4xx.c \
 Core/Src/engine_constants.c \
+Core/Src/engine_sensors.c \
 Core/Src/ignition_driver.c \
 Core/Src/injection_driver.c \
 Core/Src/main.c \

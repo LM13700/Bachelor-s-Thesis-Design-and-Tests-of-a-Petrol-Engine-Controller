@@ -22,8 +22,8 @@
  *
  *===========================================================================*/
 
-#define EXTI_GetPendingTrigger(_TRIGGER_)           (EXTI->PR & _TRIGGER_)
-#define EXTI_ClearPendingTrigger(_TRIGGER_)         (EXTI->PR |= _TRIGGER_)
+#define EXTI_GetPendingTrigger(_TRIGGER_)           (EXTI->PR & (_TRIGGER_))
+#define EXTI_ClearPendingTrigger(_TRIGGER_)         (EXTI->PR |= (_TRIGGER_))
 
 #if DEBUG
 #define WaitForInterrupt()                            __NOP()
@@ -31,11 +31,15 @@
 #define WaitForInterrupt()                            __WFI()
 #endif
 
-#define ITOA(_NUMBER_, _BASE_)                                  Utils_Itoa(_NUMBER_, _BASE_)
+#define ITOA(_NUMBER_, _BASE_)                                  Utils_Itoa((_NUMBER_), (_BASE_))
 
 /* DIFFERENCE = MINUEND - SUBTRAHEND */
-#define UTILS_CIRCULAR_DIFFERENCE(_MIN_, _SUB_, _LOOP_VAL_)     ((_MIN_ >= _SUB_) ? (_MIN_ - _SUB_) :    \
-                                                                 ((_LOOP_VAL_ - _SUB_) + _MIN_))
+#define UTILS_CIRCULAR_DIFFERENCE(_MIN_, _SUB_, _LOOP_VAL_)     (((_MIN_) >= (_SUB_)) ? ((_MIN_) - (_SUB_)) :    \
+                                                                 (((_LOOP_VAL_) - (_SUB_)) + (_MIN_)))
+
+#define UTILS_CIRCULAR_ADDITION(_VAL1_, _VAL2_, _LOOP_VAL_)     ((((_VAL1_) + (_VAL2_)) >= (_LOOP_VAL_)) ?       \
+                                                                 (((_VAL1_) + (_VAL2_)) - (_LOOP_VAL_)) :        \
+                                                                 ((_VAL1_) + (_VAL2_)))
 
 /*===========================================================================*
  *

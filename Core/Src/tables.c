@@ -46,6 +46,7 @@ typedef struct Tables_3dTable_Tag
  *
  *===========================================================================*/
 
+/* VE in % */
 static const Tables_3dTable_T tables_ve =
 {
     .xTable = 
@@ -78,6 +79,7 @@ static const Tables_3dTable_T tables_ve =
     }
 };
 
+/* Spark angle before TDC */
 static const Tables_3dTable_T tables_spark =
 {
     .xTable = 
@@ -173,6 +175,14 @@ float Tables_GetSpeedPressureTableValue(Tables_SpeedPressure_T tableType, float 
     yIndex = Tables_GetIndexFromSpeedPressureTable(pressure, table->yTable);
 
     return Tables_BilinearInterpolation(speed, pressure, xIndex, yIndex, table);
+}
+
+/*===========================================================================*
+ * Function: Tables_GetTwoDimensionsTableValue
+ *===========================================================================*/
+float Tables_GetTwoDimensionsTableValue(Tables_TwoDimensions_T tableType, float xValue)
+{
+    return 1.0F;
 }
 
 /*===========================================================================*

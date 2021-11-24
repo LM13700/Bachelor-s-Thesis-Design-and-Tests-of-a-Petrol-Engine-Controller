@@ -1,9 +1,9 @@
 /*===========================================================================*
- * File:        main.c
+ * File:        engine_sensors.c
  * Project:     ECU
- * Author:      Mateusz Mróz
- * Date:        06.09.2021
- * Brief:       Main.c
+ * Author:      Mateusz Mroz
+ * Date:        23.11.2021
+ * Brief:       Module containing sensors support
  *===========================================================================*/
 
 /*===========================================================================*
@@ -12,15 +12,7 @@
  *
  *===========================================================================*/
 
-#include "main.h"
-
-#include "ignition_driver.h"
-#include "injection_driver.h"
-#include "swo.h"
-#include "speed_density.h"
-#include "trigger_decoder.h"
-
-SWO_DefineModuleTag(MAIN);
+#include "engine_sensors.h"
 
 /*===========================================================================*
  *
@@ -40,22 +32,11 @@ SWO_DefineModuleTag(MAIN);
  *
  *===========================================================================*/
 
-volatile bool main_is_speed_trigger_occured;
-
 /*===========================================================================*
  *
  * LOCAL FUNCTION DECLARATION SECTION
  *
  *===========================================================================*/
-
-/*===========================================================================*
- * brief:       Function calling initializing functions
- * param[in]:   None
- * param[out]:  None
- * return:      None
- * details:     None
- *===========================================================================*/
-void Main_CallInits(void);
 
 /*===========================================================================*
  *
@@ -64,21 +45,39 @@ void Main_CallInits(void);
  *===========================================================================*/
 
 /*===========================================================================*
- * Function: main
+ * Function: EnSens_GetMap
  *===========================================================================*/
-int main(void)
+float EnSens_GetMap(void)
 {
-    Main_CallInits();
+    return 100.0F;
+}
 
-    while(1)
+/*===========================================================================*
+ * Function: EnSens_GetIat
+ *===========================================================================*/
+float EnSens_GetIat(void)
+{
+    return 300.0F;
+}
+
+/*===========================================================================*
+ * Function: EnSens_GetClt
+ *===========================================================================*/
+float EnSens_GetClt(EnSens_CltResultTypes_T resultType)
+{
+    switch (resultType)
     {
-        WaitForInterrupt();
-        if (main_is_speed_trigger_occured)
-        {
-            SpDen_OnTriggerInterrupt();
-            main_is_speed_trigger_occured = false;
-        }
+        case ENSENS_CLT_RESULT_TYPE_TEMPERATURE:
+            break;
+        
+        case ENSENS_CLT_RESULT_TYPE_ENRICHEMENT:
+            break;
+
+        default:
+            break;
     }
+
+    return 1.0F;
 }
 
 /*===========================================================================*
@@ -86,24 +85,6 @@ int main(void)
  * LOCAL FUNCTION DEFINITION SECTION
  *
  *===========================================================================*/
-
-/*===========================================================================*
- * Function: Main_CallInits
- *===========================================================================*/
-void Main_CallInits(void)
-{
-    DisableIRQ();
-
-    SWO_Init();
-    TrigD_Init(SpDen_TriggerCallback);
-    IgnDrv_Init();
-    InjDrv_Init();
-    SpDen_Init();
-
-    main_is_speed_trigger_occured = false;
-
-    EnableIRQ();
-}
 
 
 /* end of file */
