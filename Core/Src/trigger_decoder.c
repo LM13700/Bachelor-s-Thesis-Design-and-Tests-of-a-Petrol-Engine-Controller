@@ -26,7 +26,7 @@ SWO_DefineModuleTag(TRIGD);
  *
  *===========================================================================*/
 
-#define TRIGD_SPEED_TIMER_REGISTER              (TIMER_SPEED->CCR2)
+#define TRIGD_SPEED_TIMER_REGISTER              (TIMER_SPEED->CCR1)
 
 /*===========================================================================*
  *
@@ -56,13 +56,13 @@ extern bool main_is_speed_trigger_occured;
  *===========================================================================*/
 
 /*===========================================================================*
- * brief:       EXTI0 Interrupt request handler
+ * brief:       EXTI3 Interrupt request handler
  * param[in]:   None
  * param[out]:  None
  * return:      None
  * details:     Sync signal conditioning ISR
  *===========================================================================*/
-extern void EXTI0_IRQHandler(void);
+extern void EXTI3_IRQHandler(void);
 
 /*===========================================================================*
  * brief:       TIM3 Interrupt request handler
@@ -121,14 +121,14 @@ void TrigD_Init(Trigd_IsrCallback callback)
  *===========================================================================*/
 
 /*===========================================================================*
- * Function: EXTI0_IRQHandler
+ * Function: EXTI3_IRQHandler
  *===========================================================================*/
-void EXTI0_IRQHandler(void)
+void EXTI3_IRQHandler(void)
 {
-    if (EXTI_GetPendingTrigger(EXTI_PR_PR0))
+    if (EXTI_GetPendingTrigger(EXTI_PR_PR3))
     {
         trigd_is_sync_pending= true;
-        EXTI_ClearPendingTrigger(EXTI_PR_PR0);
+        EXTI_ClearPendingTrigger(EXTI_PR_PR3);
     }
 }
 
@@ -143,13 +143,13 @@ void TIM3_IRQHandler(void)
     main_is_speed_trigger_occured = true;
 
     /* Capture interrupt */
-    if (TIMER_SPEED->SR & TIM_SR_CC2IF)
+    if (TIMER_SPEED->SR & TIM_SR_CC1IF)
     {
         /* Start scheduled actions */
         trigd_trigger_callback();
 
-        /* Clear interrupt flag */
-        TIMER_SPEED->SR &= ~TIM_SR_CC2IF;
+        // /* Clear interrupt flag */
+        // TIMER_SPEED->SR &= ~TIM_SR_CC1IF;
 
         if (isLastValueCaptured)
         {
@@ -192,6 +192,9 @@ void TIM3_IRQHandler(void)
     {
         /* Do nothing*/
     }
+
+    SWO_Print("%d RPM \n", (uint8_t)EnCon_GetEngineSpeed());
+    SWO_Print("%d Angle \n", (uint8_t)EnCon_GetEngineAngle());
 }
 
 /*===========================================================================*
@@ -199,29 +202,31 @@ void TIM3_IRQHandler(void)
  *===========================================================================*/
 static void TrigD_SyncPinInit(void)
 {
-    /* Sync input pin: PA0 */
+    /* Sync input pin: PA3 */
 
+    /* Enable SYSCFG clock */
+    RCC->APB2ENR |= RCC_APB2ENR_SYSCFGEN;
     /* Enable GPIOA clock */
     RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN;
-    /* Set GPIOA port 0 as input */
-    GPIOA->MODER &= ~GPIO_MODER_MODER0;
-    /* Disable pull-up and pull-down for GPIOA port 0 */
-    GPIOA->PUPDR &= ~GPIO_PUPDR_PUPD0;
+    /* Set GPIOA port 3 as input */
+    GPIOA->MODER &= ~GPIO_MODER_MODER3;
+    /* Disable pull-up and pull-down for GPIOA port 3 */
+    GPIOA->PUPDR &= ~GPIO_PUPDR_PUPD3;
 
-    /* Connect PA0 pin to the EXTI0 interrupt */
-    SYSCFG->EXTICR[0] &= ~SYSCFG_EXTICR1_EXTI0;
-    /* Don't mask EXTI0 interrupt */
-    EXTI->IMR |= EXTI_IMR_IM0;
+    /* Connect PA3 pin to the EXTI3 interrupt */
+    SYSCFG->EXTICR[0] &= ~SYSCFG_EXTICR1_EXTI3;
+    /* Don't mask EXTI3 interrupt */
+    EXTI->IMR |= EXTI_IMR_IM3;
     /* Disable rising edge trigger */
-    EXTI->RTSR &= ~EXTI_RTSR_TR0;
+    EXTI->RTSR &= ~EXTI_RTSR_TR3;
     /* Enble falling edge trigger */
-    EXTI->FTSR |= EXTI_FTSR_TR0;
+    EXTI->FTSR |= EXTI_FTSR_TR3;
 
     /* Enable interrupt request */
-    NVIC_SetPriority(EXTI0_IRQn, 1U);
-    EXTI_ClearPendingTrigger(EXTI_PR_PR0);
-    NVIC_ClearPendingIRQ(EXTI0_IRQn);
-    NVIC_EnableIRQ(EXTI0_IRQn);
+    NVIC_SetPriority(EXTI3_IRQn, 1U);
+    EXTI_ClearPendingTrigger(EXTI_PR_PR3);
+    NVIC_ClearPendingIRQ(EXTI3_IRQn);
+    NVIC_EnableIRQ(EXTI3_IRQn);
 }
 
 /*===========================================================================*
@@ -236,6 +241,8 @@ static void TrigD_SpeedPinInit(void)
     RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN;
     /* Set PA6 afternative function 2 (TIM3_CH1) */
     GPIOA->AFR[0] |= GPIO_AFRL_AFSEL6_1;
+    /* Set PA6 Alternative function mode */
+    GPIOA->MODER |= GPIO_MODER_MODE6_1;
     /* Enable timer clock*/
     RCC->APB1ENR |= RCC_APB1ENR_TIM3EN;
 
@@ -245,12 +252,12 @@ static void TrigD_SpeedPinInit(void)
     TIMER_SPEED->ARR |= TIM_ARR_ARR;
 
     /* Link timer input to the capture logic */
-    TIMER_SPEED->CCMR1 |= TIM_CCMR1_CC2S_0;
+    TIMER_SPEED->CCMR1 |= TIM_CCMR1_CC1S_0;
     /* Enable rising edge trigger */
-    TIMER_SPEED->CCER &= ~TIM_CCER_CC2P;
-    TIMER_SPEED->CCER &= ~TIM_CCER_CC2NP;
+    TIMER_SPEED->CCER &= ~TIM_CCER_CC1P;
+    TIMER_SPEED->CCER &= ~TIM_CCER_CC1NP;
     /* Enable capture */
-    TIMER_SPEED->CCER |= TIM_CCER_CC2E;
+    TIMER_SPEED->CCER |= TIM_CCER_CC1E;
 
     /* Enable interrupt requests */
     TIMER_SPEED->DIER |= TIM_DIER_TIE;

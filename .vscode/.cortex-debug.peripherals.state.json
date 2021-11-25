@@ -1,1 +1,1 @@
-[{"node":"GPIOA","expanded":true,"format":0,"pinned":false},{"node":"GPIOA.AFRL","expanded":true,"format":0},{"node":"RCC.AHB1ENR","expanded":true,"format":0},{"node":"SYSCFG","expanded":true,"format":0,"pinned":false},{"node":"SYSCFG.EXTICR1","expanded":true,"format":0},{"node":"TIM3","expanded":true,"format":0,"pinned":false},{"node":"TIM3.DIER","expanded":true,"format":0}]
+[{"node":"EXTI","expanded":true,"format":0,"pinned":false},{"node":"EXTI.FTSR","expanded":true,"format":0},{"node":"TIM3.SR","expanded":true,"format":0}]

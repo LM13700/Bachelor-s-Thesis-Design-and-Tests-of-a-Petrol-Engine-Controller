@@ -79,6 +79,12 @@ void InjDrv_Init(void)
     GPIOA->AFR[0] |= GPIO_AFRL_AFSEL1_1;
     /* Set PA2 afternative function 2 (TIM5_CH3) */
     GPIOA->AFR[0] |= GPIO_AFRL_AFSEL2_1;
+    /* Set PA0 Alternative function mode */
+    GPIOA->MODER |= GPIO_MODER_MODE0_1;
+    /* Set PA1 Alternative function mode */
+    GPIOA->MODER |= GPIO_MODER_MODE1_1;
+    /* Set PA2 Alternative function mode */
+    GPIOA->MODER |= GPIO_MODER_MODE2_1;
 
     /* Enable timer clock*/
     RCC->APB1ENR |= RCC_APB1ENR_TIM5EN;

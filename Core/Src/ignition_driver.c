@@ -23,11 +23,11 @@
  *
  *===========================================================================*/
 
-#define IGNDRV_ENABLE_IGNITION_CHANNEL_1        (TIMER_IGNITION->CCMR1 |= TIM_CCMR1_OC2M)
+#define IGNDRV_ENABLE_IGNITION_CHANNEL_1        (TIMER_IGNITION->CCMR1 |= TIM_CCMR1_OC1M)
 #define IGNDRV_ENABLE_IGNITION_CHANNEL_2        (TIMER_IGNITION->CCMR2 |= TIM_CCMR2_OC3M)
 #define IGNDRV_ENABLE_IGNITION_CHANNEL_3        (TIMER_IGNITION->CCMR2 |= TIM_CCMR2_OC4M)
 
-#define IGNDRV_DISABLE_IGNITION_CHANNEL_1       (TIMER_IGNITION->CCMR1 &= ~TIM_CCMR1_OC2M)
+#define IGNDRV_DISABLE_IGNITION_CHANNEL_1       (TIMER_IGNITION->CCMR1 &= ~TIM_CCMR1_OC1M)
 #define IGNDRV_DISABLE_IGNITION_CHANNEL_2       (TIMER_IGNITION->CCMR2 &= ~TIM_CCMR2_OC3M)
 #define IGNDRV_DISABLE_IGNITION_CHANNEL_3       (TIMER_IGNITION->CCMR2 &= ~TIM_CCMR2_OC4M)
 
@@ -69,16 +69,24 @@ extern void TIM2_IRQHandler(void);
  *===========================================================================*/
 void IgnDrv_Init(void)
 {
-    /* Ignition timer: TIM2 CH2(PB3)-CH3(PB10)-CH4(PB11) */
+    /* Ignition timer: TIM2 CH1(PA15)-CH3(PB10)-CH4(PB11) */
 
     /* Enable GPIOB clock */
     RCC->AHB1ENR |= RCC_AHB1ENR_GPIOBEN;
-    /* Set PB3 afternative function 1 (TIM2_CH2) */
-    GPIOB->AFR[0] |= GPIO_AFRL_AFSEL3_0;
+    /* Enable GPIOA clock */
+    RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN;
+    /* Set PA15 afternative function 1 (TIM2_CH2) */
+    GPIOA->AFR[1] |= GPIO_AFRH_AFSEL15_0;
     /* Set PB10 afternative function 1 (TIM2_CH3) */
     GPIOB->AFR[1] |= GPIO_AFRH_AFSEL10_0;
     /* Set PB11 afternative function 1 (TIM2_CH4) */
     GPIOB->AFR[1] |= GPIO_AFRH_AFSEL11_0;
+    /* Set PA15 Alternative function mode */
+    GPIOA->MODER |= GPIO_MODER_MODE15_1;
+    /* Set PB10 Alternative function mode */
+    GPIOB->MODER |= GPIO_MODER_MODE10_1;
+    /* Set PB11 Alternative function mode */
+    GPIOB->MODER |= GPIO_MODER_MODE11_1;
 
     /* Enable timer clock*/
     RCC->APB1ENR |= RCC_APB1ENR_TIM2EN;
@@ -126,7 +134,7 @@ void IgnDrv_PrepareIgnitionChannel(EnCon_CylinderChannels_T channel, float fireA
     switch (channel)
     {
         case ENCON_CHANNEL_1:
-            TIMER_IGNITION->CCR2 |= tmpDelay;
+            TIMER_IGNITION->CCR1 |= tmpDelay;
             break;
 
         case ENCON_CHANNEL_2:
