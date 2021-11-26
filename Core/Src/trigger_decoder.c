@@ -146,11 +146,11 @@ void TIM3_IRQHandler(void)
     {
         main_is_speed_trigger_occured = true;
 
+        /* Clear interrupt flag */
+        TIMER_SPEED->SR &= ~TIM_SR_CC1IF;
+
         /* Start scheduled actions */
         trigd_trigger_callback();
-
-        // /* Clear interrupt flag */
-        // TIMER_SPEED->SR &= ~TIM_SR_CC1IF;
 
         if (isLastValueCaptured)
         {
@@ -183,6 +183,7 @@ void TIM3_IRQHandler(void)
     /* Overflow interrupt */
     else if (TIMER_SPEED->SR & TIM_SR_UIF)
     {
+        // GPIOC->ODR ^= GPIO_ODR_OD13;
         /* Clear interrupt flag */
         TIMER_SPEED->SR &= ~TIM_SR_UIF;
 
@@ -202,8 +203,8 @@ void TIM3_IRQHandler(void)
         /* Do nothing*/
     }
 
-    SWO_Print("%u RPM \n", (uint16_t)EnCon_GetEngineSpeed());
-    // SWO_Print("%d Angle \n", (uint8_t)EnCon_GetEngineAngle());
+    // SWO_Print("%u RPM \n", (uint16_t)EnCon_GetEngineSpeed());
+    // SWO_Print("%u Angle \n", (uint16_t)EnCon_GetEngineAngle());
 }
 
 /*===========================================================================*
@@ -222,12 +223,15 @@ static void TrigD_SyncPinInit(void)
     /* Disable pull-up and pull-down for GPIOA port 4 */
     GPIOA->PUPDR |= GPIO_PUPDR_PUPD4;
 
+    RCC->AHB1ENR |= RCC_AHB1ENR_GPIOCEN;
+    GPIOC->MODER |= GPIO_MODER_MODE13_0;
+
     /* Connect PA4 pin to the EXTI4 interrupt */
     SYSCFG->EXTICR[1] &= ~SYSCFG_EXTICR2_EXTI4;
     /* Don't mask EXTI4 interrupt */
     EXTI->IMR |= EXTI_IMR_IM4;
     /* Disable rising edge trigger */
-    EXTI->RTSR |= EXTI_RTSR_TR4;
+    EXTI->RTSR &= ~EXTI_RTSR_TR4;
     /* Enble falling edge trigger */
     EXTI->FTSR |= EXTI_FTSR_TR4;
 
@@ -256,7 +260,7 @@ static void TrigD_SpeedPinInit(void)
     RCC->APB1ENR |= RCC_APB1ENR_TIM3EN;
 
     /* Set timer clock prescaler to 0 (source clock divided by 0+1) */
-    TIMER_SPEED->PSC &= ~TIM_PSC_PSC;
+    TIMER_SPEED->PSC |= TIMER_SPEED_PRESCALER;
     /* Set timer auto-reload register to its max value */
     TIMER_SPEED->ARR |= TIM_ARR_ARR;
 
@@ -271,7 +275,7 @@ static void TrigD_SpeedPinInit(void)
     /* Enable interrupt requests */
     TIMER_SPEED->DIER |= TIM_DIER_TIE;
     /* Enable capture interrupt request */
-    TIMER_SPEED->DIER |= TIM_DIER_CC2IE;
+    TIMER_SPEED->DIER |= TIM_DIER_CC1IE;
     /* Enable update interrupt request */
     TIMER_SPEED->DIER |= TIM_DIER_UIE;
 

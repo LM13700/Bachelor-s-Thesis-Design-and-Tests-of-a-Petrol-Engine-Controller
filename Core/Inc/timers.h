@@ -35,6 +35,9 @@
 #define TIMER_SPEED                             (TIM3)
 #define TIMER_INJECTOR                          (TIM5)
 
+#define TIMER_SPEED_PRESCALER                   (99U)
+#define TIMER_SPEED_CLOCK                       (TIMER_TIM_CLOCK / (TIMER_SPEED_PRESCALER + 1U))
+
 #define TIMER_SPEED_TIMER_MAX_VAL               (UINT16_MAX)
 
 /*===========================================================================*
