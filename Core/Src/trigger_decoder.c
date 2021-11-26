@@ -56,13 +56,13 @@ extern bool main_is_speed_trigger_occured;
  *===========================================================================*/
 
 /*===========================================================================*
- * brief:       EXTI3 Interrupt request handler
+ * brief:       EXTI4 Interrupt request handler
  * param[in]:   None
  * param[out]:  None
  * return:      None
  * details:     Sync signal conditioning ISR
  *===========================================================================*/
-extern void EXTI3_IRQHandler(void);
+extern void EXTI4_IRQHandler(void);
 
 /*===========================================================================*
  * brief:       TIM3 Interrupt request handler
@@ -121,14 +121,14 @@ void TrigD_Init(Trigd_IsrCallback callback)
  *===========================================================================*/
 
 /*===========================================================================*
- * Function: EXTI3_IRQHandler
+ * Function: EXTI4_IRQHandler
  *===========================================================================*/
-void EXTI3_IRQHandler(void)
+void EXTI4_IRQHandler(void)
 {
-    if (EXTI_GetPendingTrigger(EXTI_PR_PR3))
+    if (EXTI_GetPendingTrigger(EXTI_PR_PR4))
     {
         trigd_is_sync_pending= true;
-        EXTI_ClearPendingTrigger(EXTI_PR_PR3);
+        EXTI_ClearPendingTrigger(EXTI_PR_PR4);
     }
 }
 
@@ -139,12 +139,13 @@ void TIM3_IRQHandler(void)
 {
     static bool isLastValueCaptured = false;
     static uint32_t lastCapturedValue;
-
-    main_is_speed_trigger_occured = true;
+    static bool isOverflowOccured = false;
 
     /* Capture interrupt */
     if (TIMER_SPEED->SR & TIM_SR_CC1IF)
     {
+        main_is_speed_trigger_occured = true;
+
         /* Start scheduled actions */
         trigd_trigger_callback();
 
@@ -177,24 +178,32 @@ void TIM3_IRQHandler(void)
         EnCon_UpdateEngineAngle(trigd_engine_angle);
         lastCapturedValue = TRIGD_SPEED_TIMER_REGISTER;
         isLastValueCaptured = true;
+        isOverflowOccured = false;
     }
     /* Overflow interrupt */
     else if (TIMER_SPEED->SR & TIM_SR_UIF)
     {
         /* Clear interrupt flag */
         TIMER_SPEED->SR &= ~TIM_SR_UIF;
-        isLastValueCaptured = false;
-        trigd_engine_angle = ENCON_ANGLE_UNKNOWN;
-        EnCon_UpdateEngineAngle(trigd_engine_angle);
-        EnCon_UpdateEngineSpeed(ENCON_SPEED_RAW_UNKNOWN);
+
+        if (true == isOverflowOccured)
+        {
+            isLastValueCaptured = false;
+            trigd_engine_angle = ENCON_ANGLE_UNKNOWN;
+            EnCon_UpdateEngineAngle(trigd_engine_angle);
+            EnCon_UpdateEngineSpeed(ENCON_SPEED_RAW_UNKNOWN);
+            main_is_speed_trigger_occured = true;
+        }
+
+        isOverflowOccured = true;
     }
     else
     {
         /* Do nothing*/
     }
 
-    SWO_Print("%d RPM \n", (uint8_t)EnCon_GetEngineSpeed());
-    SWO_Print("%d Angle \n", (uint8_t)EnCon_GetEngineAngle());
+    SWO_Print("%u RPM \n", (uint16_t)EnCon_GetEngineSpeed());
+    // SWO_Print("%d Angle \n", (uint8_t)EnCon_GetEngineAngle());
 }
 
 /*===========================================================================*
@@ -202,31 +211,31 @@ void TIM3_IRQHandler(void)
  *===========================================================================*/
 static void TrigD_SyncPinInit(void)
 {
-    /* Sync input pin: PA3 */
+    /* Sync input pin: PA4 */
 
     /* Enable SYSCFG clock */
     RCC->APB2ENR |= RCC_APB2ENR_SYSCFGEN;
     /* Enable GPIOA clock */
     RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN;
-    /* Set GPIOA port 3 as input */
-    GPIOA->MODER &= ~GPIO_MODER_MODER3;
-    /* Disable pull-up and pull-down for GPIOA port 3 */
-    GPIOA->PUPDR &= ~GPIO_PUPDR_PUPD3;
+    /* Set GPIOA port 4 as input */
+    GPIOA->MODER &= ~GPIO_MODER_MODER4;
+    /* Disable pull-up and pull-down for GPIOA port 4 */
+    GPIOA->PUPDR |= GPIO_PUPDR_PUPD4;
 
-    /* Connect PA3 pin to the EXTI3 interrupt */
-    SYSCFG->EXTICR[0] &= ~SYSCFG_EXTICR1_EXTI3;
-    /* Don't mask EXTI3 interrupt */
-    EXTI->IMR |= EXTI_IMR_IM3;
+    /* Connect PA4 pin to the EXTI4 interrupt */
+    SYSCFG->EXTICR[1] &= ~SYSCFG_EXTICR2_EXTI4;
+    /* Don't mask EXTI4 interrupt */
+    EXTI->IMR |= EXTI_IMR_IM4;
     /* Disable rising edge trigger */
-    EXTI->RTSR &= ~EXTI_RTSR_TR3;
+    EXTI->RTSR |= EXTI_RTSR_TR4;
     /* Enble falling edge trigger */
-    EXTI->FTSR |= EXTI_FTSR_TR3;
+    EXTI->FTSR |= EXTI_FTSR_TR4;
 
     /* Enable interrupt request */
-    NVIC_SetPriority(EXTI3_IRQn, 1U);
-    EXTI_ClearPendingTrigger(EXTI_PR_PR3);
-    NVIC_ClearPendingIRQ(EXTI3_IRQn);
-    NVIC_EnableIRQ(EXTI3_IRQn);
+    NVIC_SetPriority(EXTI4_IRQn, 1U);
+    EXTI_ClearPendingTrigger(EXTI_PR_PR4);
+    NVIC_ClearPendingIRQ(EXTI4_IRQn);
+    NVIC_EnableIRQ(EXTI4_IRQn);
 }
 
 /*===========================================================================*

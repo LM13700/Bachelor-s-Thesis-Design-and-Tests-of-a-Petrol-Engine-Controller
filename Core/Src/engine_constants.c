@@ -24,8 +24,7 @@
 
 #define ENCON_SECONDS_IN_MINUTE                (60.0F)
 
-#define ENCON_CALCULATE_RPM(_TIM_REG_VALUE_)   (ENCON_SECONDS_IN_MINUTE * ((_TIM_REG_VALUE_) / TIMER_TIM_CLOCK) *    \
-                                                ENCON_TRIGGER_WHEEL_TEETH_NO)
+#define ENCON_CALCULATE_RPM(_TIM_REG_VALUE_)   (ENCON_SECONDS_IN_MINUTE * (1.0F / (ENCON_TRIGGER_WHEEL_TEETH_NO * (((float)(_TIM_REG_VALUE_)) / ((float)TIMER_TIM_CLOCK)))))
 
 /*===========================================================================*
  *

@@ -160,9 +160,19 @@ static void SWO_InternalPrint(char* const format, va_list args)
             {
                 /* Decimal */
                 case 'd':
-                case 'u':
                 {
                     value = va_arg(args, int);
+                    if (value < 0)
+                    {
+                        value *= -1;
+                        SWO_PutChar('-');
+                    }
+                    SWO_PutS(ITOA(value, 10));
+                    break;
+                }
+                case 'u':
+                {
+                    value = va_arg(args, uint32_t);
 
                     if (value < 0)
                     {
@@ -176,7 +186,7 @@ static void SWO_InternalPrint(char* const format, va_list args)
                 /* Hexadecimal */
                 case 'x':
                 {
-                    value = va_arg(args, unsigned int);
+                    value = va_arg(args, uint32_t);
                     SWO_PutS(ITOA(value, 16));
                     break;
                 }

@@ -373,6 +373,9 @@ static void SetSysClock(void)
 
     /* Wait till the main PLL is used as system clock source */
     while ((RCC->CFGR & (uint32_t)RCC_CFGR_SWS ) != RCC_CFGR_SWS_PLL);
+
+    /* Update global variable */
+    SystemCoreClockUpdate();
   }
   else
   { /* If HSE fails to start-up, the application will have wrong clock
