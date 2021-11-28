@@ -56,7 +56,7 @@
 #define ENCON_ONE_TRIGGER_PULSE_ANGLE           (ENCON_ENGINE_ONE_ROTATION_ANGLE /    \
                                                  ENCON_TRIGGER_WHEEL_TEETH_NO)
 
-#define ENCON_COILS_DWELL_TIME_MS               (7.0F)
+#define ENCON_COILS_DWELL_TIME_MS               (5.0F)
 
 /* Flow rate in cm^3/s */
 #define ENCON_INJECTOR_FLOW_RATE                (150.0F)

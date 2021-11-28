@@ -49,7 +49,7 @@
  * return:      None
  * details:     None
  *===========================================================================*/
-static void SWO_PutS(const char* string);
+static void SWO_PutS(const char* string) __attribute__((used));
 
 /*===========================================================================*
  * brief:       Internal print function - vprintf alike
@@ -59,7 +59,7 @@ static void SWO_PutS(const char* string);
  * return:      None
  * details:     va_end is called at the end of the function
  *===========================================================================*/
-static void SWO_InternalPrint(char* const format, va_list args);
+static void SWO_InternalPrint(char* const format, va_list args) __attribute__((used));
 
 /*===========================================================================*
  *
@@ -126,6 +126,7 @@ void SWO_PrintLogInternal(const char* moduleTag, const int codeLine, char* forma
  *===========================================================================*/
 static void SWO_PutS(const char* string)
 {
+#ifdef DEBUG
     unsigned int index = 0;
 
     while (string[index])
@@ -134,6 +135,7 @@ static void SWO_PutS(const char* string)
 
         index++;
     }
+#endif
 }
 
 /*===========================================================================*
@@ -141,6 +143,7 @@ static void SWO_PutS(const char* string)
  *===========================================================================*/
 static void SWO_InternalPrint(char* const format, va_list args)
 {
+#ifdef DEBUG
     char* inputCh;
     int32_t value;
 
@@ -218,6 +221,7 @@ static void SWO_InternalPrint(char* const format, va_list args)
     } while (*inputCh != '\0');
 
     va_end(args);
+#endif
 }
 
 

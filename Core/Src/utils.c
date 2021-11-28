@@ -49,6 +49,7 @@
 /*===========================================================================*
  * Function: Utils_Itoa
  *===========================================================================*/
+/* TODO correct this function -> local adress return */
 char* Utils_Itoa(unsigned int number, unsigned int base)
 {
     char symbols[]= "0123456789ABCDEF";

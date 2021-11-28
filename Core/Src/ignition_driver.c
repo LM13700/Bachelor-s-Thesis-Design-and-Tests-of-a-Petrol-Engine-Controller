@@ -71,11 +71,13 @@ void IgnDrv_Init(void)
 {
     /* Ignition timer: TIM2 CH1(PA15)-CH3(PB10)-CH4(PA3) */
 
-    /* Enable GPIOB clock */
-    RCC->AHB1ENR |= RCC_AHB1ENR_GPIOBEN;
     /* Enable GPIOA clock */
     RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN;
-    /* Set PA15 afternative function 1 (TIM2_CH2) */
+    /* Enable GPIOB clock */
+    RCC->AHB1ENR |= RCC_AHB1ENR_GPIOBEN;
+    /* Disable pull-up and pull-down for GPIOA port 15 */
+    GPIOA->PUPDR &= ~GPIO_PUPDR_PUPD15;
+    /* Set PA15 afternative function 1 (TIM2_CH1) */
     GPIOA->AFR[1] |= GPIO_AFRH_AFSEL15_0;
     /* Set PB10 afternative function 1 (TIM2_CH3) */
     GPIOB->AFR[1] |= GPIO_AFRH_AFSEL10_0;
@@ -91,7 +93,13 @@ void IgnDrv_Init(void)
     /* Enable timer clock*/
     RCC->APB1ENR |= RCC_APB1ENR_TIM2EN;
     /* Set timer clock prescaler to 0 (source clock divided by 0+1) */
-    TIMER_IGNITION->PSC &= ~TIM_PSC_PSC;
+    TIMER_IGNITION->PSC = (uint16_t)0U;
+    /* Select the up counting mode */
+    TIMER_IGNITION->CR1 &= ~(TIM_CR1_DIR | TIM_CR1_CMS);
+    /* Enable ignition channels outputs */
+    TIMER_IGNITION->CCER |= TIM_CCER_CC1E;
+    TIMER_IGNITION->CCER |= TIM_CCER_CC3E;
+    TIMER_IGNITION->CCER |= TIM_CCER_CC4E;
     /* Set one-shot mode */
     TIMER_IGNITION->CR1 |= TIM_CR1_OPM;
 
@@ -99,6 +107,11 @@ void IgnDrv_Init(void)
     TIMER_IGNITION->DIER |= TIM_DIER_TIE;
     /* Enable update interrupt request */
     TIMER_IGNITION->DIER |= TIM_DIER_UIE;
+
+#ifdef DEBUG
+    /* Stop timer when core is halted in debug */
+    DBGMCU->APB1FZ |= DBGMCU_APB1_FZ_DBG_TIM2_STOP;
+#endif
 
     NVIC_SetPriority(TIM2_IRQn, 1U);
     NVIC_ClearPendingIRQ(TIM2_IRQn);
@@ -122,27 +135,37 @@ void IgnDrv_PrepareIgnitionChannel(EnCon_CylinderChannels_T channel, float fireA
     engineSpeedRaw = EnCon_GetEngineSpeedRaw();
     angleDifference = UTILS_CIRCULAR_DIFFERENCE(fireAngle, startAngle, ENCON_ENGINE_FULL_CYCLE_ANGLE);
 
+    /* Make sure counter register is reset */
+    TIMER_IGNITION->CNT = 0U;
+
     /* tdelay = TIMx_CCR */
     /* tpulse = TIMx_ARR - TIMx_CCR + 1 */
 
     /* Set total time: tdelay + tpulse - 1 = TIMx_ARR */
-    TIMER_IGNITION->ARR = Utils_FloatToUint32((angleDifference / ENCON_ONE_TRIGGER_PULSE_ANGLE) * engineSpeedRaw) - 1U;
+    TIMER_IGNITION->ARR = Utils_FloatToUint32((angleDifference / ENCON_ONE_TRIGGER_PULSE_ANGLE) *
+                                              TIMER_SPEED_TIM_MULTIPLIER * engineSpeedRaw) - 1U;
 
     /* TIMx_CCR = TIMx_ARR + 1 - tpulse */
     tmpDelay = (TIMER_IGNITION->ARR + 1U) - TIMER_MS_TO_TIMER_REG_VALUE(ENCON_COILS_DWELL_TIME_MS);
 
+    // TIM2->ARR = 4561872U;
+    // tmpDelay = 4061873U;
+
     switch (channel)
     {
         case ENCON_CHANNEL_1:
-            TIMER_IGNITION->CCR1 |= tmpDelay;
+            TIMER_IGNITION->CCR1 = tmpDelay;
+            IGNDRV_ENABLE_IGNITION_CHANNEL_1;
             break;
 
         case ENCON_CHANNEL_2:
-            TIMER_IGNITION->CCR3 |= tmpDelay;
+            TIMER_IGNITION->CCR3 = tmpDelay;
+            IGNDRV_ENABLE_IGNITION_CHANNEL_2;
             break;
 
         case ENCON_CHANNEL_3:
-            TIMER_IGNITION->CCR4 |= tmpDelay;
+            TIMER_IGNITION->CCR4 = tmpDelay;
+            IGNDRV_ENABLE_IGNITION_CHANNEL_3;
             break;
 
         default:
@@ -159,24 +182,6 @@ igndrv_prepare_ignition_channel_exit:
  *===========================================================================*/
 void IgnDrv_StartIgnitionModule(EnCon_CylinderChannels_T channel)
 {
-    switch (channel)
-    {
-        case ENCON_CHANNEL_1:
-            IGNDRV_ENABLE_IGNITION_CHANNEL_1;
-            break;
-
-        case ENCON_CHANNEL_2:
-            IGNDRV_ENABLE_IGNITION_CHANNEL_2;
-            break;
-
-        case ENCON_CHANNEL_3:
-            IGNDRV_ENABLE_IGNITION_CHANNEL_3;
-            break;
-
-        default:
-            break;
-    }
-
     /* Start the timer */
     TIMER_IGNITION->CR1 |= TIM_CR1_CEN;
 }

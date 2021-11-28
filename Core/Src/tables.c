@@ -58,6 +58,7 @@ static const Tables_3dTable_T tables_ve =
     {
         25.0F, 30.0F, 36.0F, 40.0F, 46.0F, 50.0F, 56.0F, 60.0F, 66.0F, 70.0F, 76.0F, 80.0F, 86.0F, 92.0F, 96.0F, 101.0F
     },
+    /* This table is written as it's natural for humans, point 0.0 is in the bottom left corner of the table */
     .zTable =
     {
         { 22.0F, 22.0F, 23.0F, 31.0F, 41.0F, 47.0F, 52.0F, 55.0F, 58.0F, 59.0F, 59.0F, 57.0F, 54.0F, 51.0F, 48.0F, 46.0F },
@@ -91,6 +92,7 @@ static const Tables_3dTable_T tables_spark =
     {
         25.0F, 30.0F, 36.0F, 40.0F, 46.0F, 50.0F, 56.0F, 60.0F, 66.0F, 70.0F, 76.0F, 80.0F, 86.0F, 92.0F, 96.0F, 101.0F
     },
+    /* This table is written as it's natural for humans, point 0.0 is in the bottom left corner of the table */
     .zTable =
     {
         { 13.0F, 10.0F, 15.8F, 18.1F, 21.6F, 25.2F, 28.7F, 31.0F, 34.6F, 38.1F, 39.3F, 39.3F, 39.3F, 39.3F, 39.3F, 39.3F },
@@ -199,6 +201,8 @@ float Tables_BilinearInterpolation(float x, float y, uint8_t x0, uint8_t y0, con
     float u;
     float v;
 
+    /* zTable[yIndex][xIndex] - becouse of the way it's stored in C */
+
     if (NULL == table)
     {
         return 0.0F;
@@ -207,8 +211,12 @@ float Tables_BilinearInterpolation(float x, float y, uint8_t x0, uint8_t y0, con
     u = (x - table->xTable[x0]) / (table->xTable[x0 + 1U] - table->xTable[x0]);
     v = (y - table->yTable[y0]) / (table->yTable[y0 + 1U] - table->yTable[y0]);
 
-    return (1.0F - u) * (((1.0F - v) * table->zTable[x0][y0]) + (v * table->zTable[x0][y0 + 1U])) +
-           (u * (((1.0F - v) * table->zTable[x0 + 1U][y0]) + (v * table->zTable[x0 + 1U][y0 + 1U])));
+    /* Z table is written in cartesian coordinate (0,0 is in bottom left corner) */
+    /* In C (0,0) is top left corner, so y index need to be flipped */
+    y0 = TABLES_SPEED_PRESSURE_ROWS - y0;
+
+    return (1.0F - u) * (((1.0F - v) * table->zTable[y0][x0]) + (v * table->zTable[y0 + 1U][x0])) +
+           (u * (((1.0F - v) * table->zTable[y0][x0 + 1U]) + (v * table->zTable[y0 + 1U][x0 + 1U])));
 }
 
 /*===========================================================================*

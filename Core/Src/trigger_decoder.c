@@ -144,13 +144,11 @@ void TIM3_IRQHandler(void)
     /* Capture interrupt */
     if (TIMER_SPEED->SR & TIM_SR_CC1IF)
     {
-        main_is_speed_trigger_occured = true;
+        /* Start scheduled actions */
+        trigd_trigger_callback();
 
         /* Clear interrupt flag */
         TIMER_SPEED->SR &= ~TIM_SR_CC1IF;
-
-        /* Start scheduled actions */
-        trigd_trigger_callback();
 
         if (isLastValueCaptured)
         {
@@ -179,16 +177,17 @@ void TIM3_IRQHandler(void)
         lastCapturedValue = TRIGD_SPEED_TIMER_REGISTER;
         isLastValueCaptured = true;
         isOverflowOccured = false;
+        main_is_speed_trigger_occured = true;
     }
     /* Overflow interrupt */
     else if (TIMER_SPEED->SR & TIM_SR_UIF)
     {
-        // GPIOC->ODR ^= GPIO_ODR_OD13;
         /* Clear interrupt flag */
         TIMER_SPEED->SR &= ~TIM_SR_UIF;
 
         if (true == isOverflowOccured)
         {
+            /* TODO cancel sheduled injection/ignition actions */
             isLastValueCaptured = false;
             trigd_engine_angle = ENCON_ANGLE_UNKNOWN;
             EnCon_UpdateEngineAngle(trigd_engine_angle);
@@ -203,7 +202,7 @@ void TIM3_IRQHandler(void)
         /* Do nothing*/
     }
 
-    // SWO_Print("%u RPM \n", (uint16_t)EnCon_GetEngineSpeed());
+    SWO_Print("%u RPM \n", (uint16_t)EnCon_GetEngineSpeed());
     // SWO_Print("%u Angle \n", (uint16_t)EnCon_GetEngineAngle());
 }
 
@@ -221,10 +220,7 @@ static void TrigD_SyncPinInit(void)
     /* Set GPIOA port 4 as input */
     GPIOA->MODER &= ~GPIO_MODER_MODER4;
     /* Disable pull-up and pull-down for GPIOA port 4 */
-    GPIOA->PUPDR |= GPIO_PUPDR_PUPD4;
-
-    RCC->AHB1ENR |= RCC_AHB1ENR_GPIOCEN;
-    GPIOC->MODER |= GPIO_MODER_MODE13_0;
+    GPIOA->PUPDR &= ~GPIO_PUPDR_PUPD4;
 
     /* Connect PA4 pin to the EXTI4 interrupt */
     SYSCFG->EXTICR[1] &= ~SYSCFG_EXTICR2_EXTI4;
