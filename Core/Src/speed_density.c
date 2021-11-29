@@ -41,6 +41,13 @@
 
 #define SPDEN_AIR_MASS(_PRESS_, _TEMP_)    ((_PRESS_) / (_TEMP_) * spden_air_mass_helper)
 
+#define SPDEN_PISTON_1_INTAKE_ANGLE        (UTILS_CIRCULAR_ADDITION(ENCON_ENGINE_PISTON_1_OFFSET,           \
+                                            ENCON_ENGINE_INTAKE_ANGLE, ENCON_ENGINE_FULL_CYCLE_ANGLE))
+#define SPDEN_PISTON_2_INTAKE_ANGLE        (UTILS_CIRCULAR_ADDITION(ENCON_ENGINE_PISTON_2_OFFSET,           \
+                                            ENCON_ENGINE_INTAKE_ANGLE, ENCON_ENGINE_FULL_CYCLE_ANGLE))
+#define SPDEN_PISTON_3_INTAKE_ANGLE        (UTILS_CIRCULAR_ADDITION(ENCON_ENGINE_PISTON_3_OFFSET,           \
+                                            ENCON_ENGINE_INTAKE_ANGLE, ENCON_ENGINE_FULL_CYCLE_ANGLE))
+
 /*===========================================================================*
  *
  * LOCAL TYPES AND ENUMERATION SECTION
@@ -56,6 +63,14 @@ typedef enum SpDen_EngineState_Tag
     SPDEN_ENGINE_STATE_COUNT
 } SpDen_EngineState_T;
 
+typedef enum SpDen_ChannelCheckEvent_Tag
+{
+    SPDEN_CHANNEL_CHECK_EVENT_IGNITION,
+    SPDEN_CHANNEL_CHECK_EVENT_INJECTION,
+
+    SPDEN_CHANNEL_CHECK_EVENT_COUNT
+} SpDen_ChannelCheckEvent_T;
+
 /*===========================================================================*
  *
  * GLOBAL VARIABLES AND CONSTANTS SECTION
@@ -64,38 +79,41 @@ typedef enum SpDen_EngineState_Tag
 
 static const float spden_air_mass_helper = (ENCON_CYLINDER_VOLUME_M3 * SPDEN_AIR_MOLAR_MASS) / SPDEN_GAS_CONSTANT;
 
-static volatile EnCon_CylinderChannels_T spden_pending_cylinder_channel;
+static volatile EnCon_CylinderChannels_T spden_pending_injection_event;
+static volatile EnCon_CylinderChannels_T spden_pending_ignition_event;
 
 static SpDen_EngineState_T spden_engine_state;
-
-/* Calculations begin after each cylinder work stroke */
-static const float spden_calc_beggining_angles[ENCON_ENGINE_PISTONS_NO] =
-{
-    UTILS_CIRCULAR_ADDITION(ENCON_ENGINE_FIRST_PISTON_OFFSET, ENCON_ENGINE_EXHAUST_ANGLE,
-                            ENCON_ENGINE_FULL_CYCLE_ANGLE),
-    UTILS_CIRCULAR_ADDITION(ENCON_ENGINE_SECOND_PISTON_OFFSET, ENCON_ENGINE_EXHAUST_ANGLE,
-                            ENCON_ENGINE_FULL_CYCLE_ANGLE),
-    UTILS_CIRCULAR_ADDITION(ENCON_ENGINE_THIRD_PISTON_OFFSET, ENCON_ENGINE_EXHAUST_ANGLE,
-                            ENCON_ENGINE_FULL_CYCLE_ANGLE)
-};
 
 /* Cylinders work TDC angle compared to the first piston TDC angle */
 static const float spden_work_tdc_angles[ENCON_ENGINE_PISTONS_NO] =
 {
-    ENCON_ENGINE_FIRST_PISTON_OFFSET,
-    ENCON_ENGINE_SECOND_PISTON_OFFSET,
-    ENCON_ENGINE_THIRD_PISTON_OFFSET
+    ENCON_ENGINE_PISTON_1_OFFSET,
+    ENCON_ENGINE_PISTON_2_OFFSET,
+    ENCON_ENGINE_PISTON_3_OFFSET
 };
 
 /* Cylinders intake beggining angle compared to the first piston TDC angle */
 static const float spden_intake_beggining_angles[ENCON_ENGINE_PISTONS_NO] =
 {
-    UTILS_CIRCULAR_ADDITION(ENCON_ENGINE_FIRST_PISTON_OFFSET, ENCON_ENGINE_INTAKE_ANGLE,
-                            ENCON_ENGINE_FULL_CYCLE_ANGLE) + ENCON_FUEL_DELIVERY_OFFSET_ANGLE,
-    UTILS_CIRCULAR_ADDITION(ENCON_ENGINE_SECOND_PISTON_OFFSET, ENCON_ENGINE_INTAKE_ANGLE,
-                            ENCON_ENGINE_FULL_CYCLE_ANGLE) + ENCON_FUEL_DELIVERY_OFFSET_ANGLE,
-    UTILS_CIRCULAR_ADDITION(ENCON_ENGINE_THIRD_PISTON_OFFSET, ENCON_ENGINE_INTAKE_ANGLE,
-                            ENCON_ENGINE_FULL_CYCLE_ANGLE) + ENCON_FUEL_DELIVERY_OFFSET_ANGLE
+    SPDEN_PISTON_1_INTAKE_ANGLE + ENCON_FUEL_DELIVERY_OFFSET_ANGLE,
+    SPDEN_PISTON_2_INTAKE_ANGLE + ENCON_FUEL_DELIVERY_OFFSET_ANGLE,
+    SPDEN_PISTON_3_INTAKE_ANGLE + ENCON_FUEL_DELIVERY_OFFSET_ANGLE,
+};
+
+/* Ignition event is calculated when previous piston work cycle ends */
+static const float spden_ignition_calc_angles[ENCON_ENGINE_PISTONS_NO] =
+{
+    ENCON_ENGINE_PISTON_3_OFFSET,
+    ENCON_ENGINE_PISTON_1_OFFSET,
+    ENCON_ENGINE_PISTON_2_OFFSET,
+};
+
+/* Onjection event is calculated when previous piston intake cycle ends */
+static const float spden_injection_calc_angles[ENCON_ENGINE_PISTONS_NO] =
+{
+    SPDEN_PISTON_3_INTAKE_ANGLE,
+    SPDEN_PISTON_1_INTAKE_ANGLE,
+    SPDEN_PISTON_2_INTAKE_ANGLE
 };
 
 /*===========================================================================*
@@ -114,14 +132,14 @@ static const float spden_intake_beggining_angles[ENCON_ENGINE_PISTONS_NO] =
 static void SpDen_CheckCurrentEngineState(void);
 
 /*===========================================================================*
- * brief:       Finds if any of the cylinders needs to be prepared
- * param[in]:   None
+ * brief:       Finds if any of the cylinders needs to be prepared for given event
+ * param[in]:   event - specifies which event need to be checked
  * param[out]:  None
  * return:      EnCon_CylinderChannels_T - return valid channel number, or ENCON_CHANNEL_COUNT
  *              when no action need to be taken
- * details:     This function sets global spden_pending_cylinder_channel variable
+ * details:     This function sets global spden_pending_injection_event variable
  *===========================================================================*/
-static EnCon_CylinderChannels_T SpDen_GetPendingChannel(void);
+static EnCon_CylinderChannels_T SpDen_GetPendingChannel(SpDen_ChannelCheckEvent_T event);
 
 /*===========================================================================*
  * brief:       Calculate fuel injection duration
@@ -155,8 +173,9 @@ static float SpDen_CalculateSpark(float speed, float pressure, EnCon_CylinderCha
  *===========================================================================*/
 void SpDen_Init(void)
 {
-    spden_pending_cylinder_channel = SPDEN_NO_PENDING_CHANNEL;
     spden_engine_state = SPDEN_ENGINE_STATE_NOT_RUNNING;
+    spden_pending_ignition_event = SPDEN_NO_PENDING_CHANNEL;
+    spden_pending_injection_event = SPDEN_NO_PENDING_CHANNEL;
 }
 
 /*===========================================================================*
@@ -175,28 +194,47 @@ void SpDen_OnTriggerInterrupt(void)
 
     if (spden_engine_state != SPDEN_ENGINE_STATE_NOT_RUNNING)
     {
-        channel = SpDen_GetPendingChannel();
-
+        /* Check for ignition event */
+        channel = SpDen_GetPendingChannel(SPDEN_CHANNEL_CHECK_EVENT_IGNITION);
         if (channel != SPDEN_NO_PENDING_CHANNEL)
         {
             engineSpeed = EnCon_GetEngineSpeed();
             enginePressure = EnSens_GetMap();
-
-            fuelPulseMs = SpDen_CalculateFuel(engineSpeed, enginePressure);
             sparkAngle = SpDen_CalculateSpark(engineSpeed, enginePressure, channel);
 
             DisableIRQ();
 
+            /* Get engine angle one more time in case interrupt occured meantime */
             engineAngle = EnCon_GetEngineAngle();
             /* Event timers will be triggered after next interrupt */
             engineAngle += ENCON_ONE_TRIGGER_PULSE_ANGLE;
 
-            InjDrv_PrepareInjectionChannel(channel, spden_intake_beggining_angles[channel], engineAngle, fuelPulseMs);
             IgnDrv_PrepareIgnitionChannel(channel, sparkAngle, engineAngle);
-            spden_pending_cylinder_channel = channel;
+            spden_pending_ignition_event = channel;
 
             EnableIRQ();
         }
+
+        // /* Check for injection event */
+        // channel = SpDen_GetPendingChannel(SPDEN_CHANNEL_CHECK_EVENT_INJECTION);
+        // if (channel != SPDEN_NO_PENDING_CHANNEL)
+        // {
+        //     engineSpeed = EnCon_GetEngineSpeed();
+        //     enginePressure = EnSens_GetMap();
+        //     fuelPulseMs = SpDen_CalculateFuel(engineSpeed, enginePressure);
+
+        //     DisableIRQ();
+
+        //     /* Get engine angle one more time in case interrupt occured meantime */
+        //     engineAngle = EnCon_GetEngineAngle();
+        //     /* Event timers will be triggered after next interrupt */
+        //     engineAngle += ENCON_ONE_TRIGGER_PULSE_ANGLE;
+
+        //     InjDrv_PrepareInjectionChannel(channel, spden_intake_beggining_angles[channel], engineAngle, fuelPulseMs);
+        //     spden_pending_injection_event = channel;
+
+        //     EnableIRQ();
+        // }
     }
 }
 
@@ -205,11 +243,16 @@ void SpDen_OnTriggerInterrupt(void)
  *===========================================================================*/
 void SpDen_TriggerCallback(void)
 {
-    if (spden_pending_cylinder_channel != SPDEN_NO_PENDING_CHANNEL)
+    if (spden_pending_ignition_event != SPDEN_NO_PENDING_CHANNEL)
     {
-        IgnDrv_StartIgnitionModule(spden_pending_cylinder_channel);
-        InjDrv_StartInjectionModule(spden_pending_cylinder_channel);
-        spden_pending_cylinder_channel = SPDEN_NO_PENDING_CHANNEL;
+        IgnDrv_StartIgnitionModule();
+        spden_pending_ignition_event = SPDEN_NO_PENDING_CHANNEL;
+    }
+
+    if (spden_pending_injection_event != SPDEN_NO_PENDING_CHANNEL)
+    {
+        InjDrv_StartInjectionModule(spden_pending_injection_event);
+        spden_pending_injection_event = SPDEN_NO_PENDING_CHANNEL;
     }
 }
 
@@ -249,16 +292,33 @@ static void SpDen_CheckCurrentEngineState(void)
 /*===========================================================================*
  * Function: SpDen_GetPendingChannel
  *===========================================================================*/
-static EnCon_CylinderChannels_T SpDen_GetPendingChannel(void)
+static EnCon_CylinderChannels_T SpDen_GetPendingChannel(SpDen_ChannelCheckEvent_T event)
 {
     float engineAngle;
     EnCon_CylinderChannels_T channel;
+    const float* calcStartAngles;
+
+    switch (event)
+    {
+        case SPDEN_CHANNEL_CHECK_EVENT_IGNITION:
+            calcStartAngles = spden_ignition_calc_angles;
+            break;
+
+        case SPDEN_CHANNEL_CHECK_EVENT_INJECTION:
+            calcStartAngles = spden_injection_calc_angles;
+            break;
+    
+        default:
+            channel = ENCON_CHANNEL_COUNT;
+            goto sp_den_get_pending_channel_exit;
+            break;
+    }
 
     engineAngle = EnCon_GetEngineAngle();
 
     for (channel = 0; channel < ENCON_CHANNEL_COUNT; channel++)
     {
-        if (spden_calc_beggining_angles[channel] == engineAngle)
+        if (calcStartAngles[channel] == engineAngle)
         {
             goto sp_den_get_pending_channel_exit;
         }

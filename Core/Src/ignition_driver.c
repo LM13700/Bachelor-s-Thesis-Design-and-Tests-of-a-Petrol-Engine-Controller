@@ -148,24 +148,27 @@ void IgnDrv_PrepareIgnitionChannel(EnCon_CylinderChannels_T channel, float fireA
     /* TIMx_CCR = TIMx_ARR + 1 - tpulse */
     tmpDelay = (TIMER_IGNITION->ARR + 1U) - TIMER_MS_TO_TIMER_REG_VALUE(ENCON_COILS_DWELL_TIME_MS);
 
-    // TIM2->ARR = 4561872U;
-    // tmpDelay = 4061873U;
-
     switch (channel)
     {
         case ENCON_CHANNEL_1:
             TIMER_IGNITION->CCR1 = tmpDelay;
             IGNDRV_ENABLE_IGNITION_CHANNEL_1;
+            IGNDRV_DISABLE_IGNITION_CHANNEL_2;
+            IGNDRV_DISABLE_IGNITION_CHANNEL_3;
             break;
 
         case ENCON_CHANNEL_2:
             TIMER_IGNITION->CCR3 = tmpDelay;
             IGNDRV_ENABLE_IGNITION_CHANNEL_2;
+            IGNDRV_DISABLE_IGNITION_CHANNEL_1;
+            IGNDRV_DISABLE_IGNITION_CHANNEL_3;
             break;
 
         case ENCON_CHANNEL_3:
             TIMER_IGNITION->CCR4 = tmpDelay;
             IGNDRV_ENABLE_IGNITION_CHANNEL_3;
+            IGNDRV_DISABLE_IGNITION_CHANNEL_1;
+            IGNDRV_DISABLE_IGNITION_CHANNEL_2;
             break;
 
         default:
@@ -180,7 +183,7 @@ igndrv_prepare_ignition_channel_exit:
 /*===========================================================================*
  * Function: IGNDRV_StartIgnitionModule
  *===========================================================================*/
-void IgnDrv_StartIgnitionModule(EnCon_CylinderChannels_T channel)
+void IgnDrv_StartIgnitionModule(void)
 {
     /* Start the timer */
     TIMER_IGNITION->CR1 |= TIM_CR1_CEN;
@@ -203,9 +206,9 @@ extern void TIM2_IRQHandler(void)
         /* Clear interrupt flag */
         TIMER_IGNITION->SR &= ~TIM_SR_UIF;
         /* Disable all ignition channels */
-        IGNDRV_DISABLE_IGNITION_CHANNEL_1;
-        IGNDRV_DISABLE_IGNITION_CHANNEL_2;
-        IGNDRV_DISABLE_IGNITION_CHANNEL_3;
+        // IGNDRV_DISABLE_IGNITION_CHANNEL_1;
+        // IGNDRV_DISABLE_IGNITION_CHANNEL_2;
+        // IGNDRV_DISABLE_IGNITION_CHANNEL_3;
     }
     else
     {

@@ -64,12 +64,12 @@ void IgnDrv_PrepareIgnitionChannel(EnCon_CylinderChannels_T channel, float fireA
 
 /*===========================================================================*
  * brief:       Starts ignition module
- * param[in]:   channel - channel which will be started
+ * param[in]:   None
  * param[out]:  None
  * return:      None
  * details:     It is necessary to previously prepare proper channel via prepare function
  *===========================================================================*/
-void IgnDrv_StartIgnitionModule(EnCon_CylinderChannels_T channel);
+void IgnDrv_StartIgnitionModule(void);
 
 
 #endif

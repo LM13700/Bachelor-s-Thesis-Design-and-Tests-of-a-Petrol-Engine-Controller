@@ -127,8 +127,8 @@ void EXTI4_IRQHandler(void)
 {
     if (EXTI_GetPendingTrigger(EXTI_PR_PR4))
     {
-        trigd_is_sync_pending= true;
         EXTI_ClearPendingTrigger(EXTI_PR_PR4);
+        trigd_is_sync_pending= true;
     }
 }
 
@@ -146,6 +146,8 @@ void TIM3_IRQHandler(void)
     {
         /* Start scheduled actions */
         trigd_trigger_callback();
+
+        GPIOC->ODR ^= GPIO_ODR_OD13;
 
         /* Clear interrupt flag */
         TIMER_SPEED->SR &= ~TIM_SR_CC1IF;
@@ -165,13 +167,17 @@ void TIM3_IRQHandler(void)
         {
             if (trigd_engine_angle != ENCON_ANGLE_UNKNOWN)
             {
-                trigd_engine_angle += (ENCON_ONE_TRIGGER_PULSE_ANGLE);
-                if (trigd_engine_angle >= ENCON_ENGINE_FULL_CYCLE_ANGLE)
-                {
-                    trigd_engine_angle -= ENCON_ENGINE_FULL_CYCLE_ANGLE;
-                }
+                // trigd_engine_angle += ENCON_ONE_TRIGGER_PULSE_ANGLE;
+                // if (trigd_engine_angle >= ENCON_ENGINE_FULL_CYCLE_ANGLE)
+                // {
+                //     trigd_engine_angle -= ENCON_ENGINE_FULL_CYCLE_ANGLE;
+                // }
+                trigd_engine_angle = UTILS_CIRCULAR_ADDITION(trigd_engine_angle, ENCON_ONE_TRIGGER_PULSE_ANGLE,
+                                                             ENCON_ENGINE_FULL_CYCLE_ANGLE);
             }
         }
+
+        SWO_Print("%u Angle \n", (uint16_t)trigd_engine_angle);
 
         EnCon_UpdateEngineAngle(trigd_engine_angle);
         lastCapturedValue = TRIGD_SPEED_TIMER_REGISTER;
@@ -202,8 +208,7 @@ void TIM3_IRQHandler(void)
         /* Do nothing*/
     }
 
-    SWO_Print("%u RPM \n", (uint16_t)EnCon_GetEngineSpeed());
-    // SWO_Print("%u Angle \n", (uint16_t)EnCon_GetEngineAngle());
+    // SWO_Print("%u RPM \n", (uint16_t)EnCon_GetEngineSpeed());
 }
 
 /*===========================================================================*
