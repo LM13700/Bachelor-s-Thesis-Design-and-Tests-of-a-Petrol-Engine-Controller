@@ -77,7 +77,7 @@ float EnSens_GetClt(EnSens_CltResultTypes_T resultType)
             break;
     }
 
-    return 1.0F;
+    return 0.0F;
 }
 
 /*===========================================================================*

@@ -44,7 +44,6 @@
 #define ENCON_ENGINE_PISTON_3_OFFSET            (ENCON_ENGINE_FULL_CYCLE_ANGLE / ENCON_ENGINE_PISTONS_NO * 2.0F)
 
 #define ENCON_ENGINE_DISPLACEMENT_M3            (0.000796F)
-#define ENCON_CYLINDER_VOLUME_M3                (ENCON_ENGINE_DISPLACEMENT_M3 / ENCON_ENGINE_PISTONS_NO)
 
 /* Angle of engine used for synchronisation */
 /* This angle is set at first speed signal after sync signal */
