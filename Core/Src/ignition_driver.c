@@ -205,10 +205,6 @@ extern void TIM2_IRQHandler(void)
     {
         /* Clear interrupt flag */
         TIMER_IGNITION->SR &= ~TIM_SR_UIF;
-        /* Disable all ignition channels */
-        // IGNDRV_DISABLE_IGNITION_CHANNEL_1;
-        // IGNDRV_DISABLE_IGNITION_CHANNEL_2;
-        // IGNDRV_DISABLE_IGNITION_CHANNEL_3;
     }
     else
     {

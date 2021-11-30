@@ -66,12 +66,12 @@ void InjDrv_PrepareInjectionChannel(EnCon_CylinderChannels_T channel, float injA
 
 /*===========================================================================*
  * brief:       Starts injection module
- * param[in]:   channel - channel which will be started
+ * param[in]:   None
  * param[out]:  None
  * return:      None
  * details:     It is necessary to previously prepare proper channel via prepare function
  *===========================================================================*/
-void InjDrv_StartInjectionModule(EnCon_CylinderChannels_T channel);
+void InjDrv_StartInjectionModule(void);
 
 
 #endif

@@ -215,26 +215,26 @@ void SpDen_OnTriggerInterrupt(void)
             EnableIRQ();
         }
 
-        // /* Check for injection event */
-        // channel = SpDen_GetPendingChannel(SPDEN_CHANNEL_CHECK_EVENT_INJECTION);
-        // if (channel != SPDEN_NO_PENDING_CHANNEL)
-        // {
-        //     engineSpeed = EnCon_GetEngineSpeed();
-        //     enginePressure = EnSens_GetMap();
-        //     fuelPulseMs = SpDen_CalculateFuel(engineSpeed, enginePressure);
+        /* Check for injection event */
+        channel = SpDen_GetPendingChannel(SPDEN_CHANNEL_CHECK_EVENT_INJECTION);
+        if (channel != SPDEN_NO_PENDING_CHANNEL)
+        {
+            engineSpeed = EnCon_GetEngineSpeed();
+            enginePressure = EnSens_GetMap();
+            fuelPulseMs = SpDen_CalculateFuel(engineSpeed, enginePressure);
 
-        //     DisableIRQ();
+            DisableIRQ();
 
-        //     /* Get engine angle one more time in case interrupt occured meantime */
-        //     engineAngle = EnCon_GetEngineAngle();
-        //     /* Event timers will be triggered after next interrupt */
-        //     engineAngle += ENCON_ONE_TRIGGER_PULSE_ANGLE;
+            /* Get engine angle one more time in case interrupt occured meantime */
+            engineAngle = EnCon_GetEngineAngle();
+            /* Event timers will be triggered after next interrupt */
+            engineAngle += ENCON_ONE_TRIGGER_PULSE_ANGLE;
 
-        //     InjDrv_PrepareInjectionChannel(channel, spden_intake_beggining_angles[channel], engineAngle, fuelPulseMs);
-        //     spden_pending_injection_event = channel;
+            InjDrv_PrepareInjectionChannel(channel, spden_intake_beggining_angles[channel], engineAngle, fuelPulseMs);
+            spden_pending_injection_event = channel;
 
-        //     EnableIRQ();
-        // }
+            EnableIRQ();
+        }
     }
 }
 
@@ -251,7 +251,7 @@ void SpDen_TriggerCallback(void)
 
     if (spden_pending_injection_event != SPDEN_NO_PENDING_CHANNEL)
     {
-        InjDrv_StartInjectionModule(spden_pending_injection_event);
+        InjDrv_StartInjectionModule();
         spden_pending_injection_event = SPDEN_NO_PENDING_CHANNEL;
     }
 }

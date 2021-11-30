@@ -89,7 +89,13 @@ void InjDrv_Init(void)
     /* Enable timer clock*/
     RCC->APB1ENR |= RCC_APB1ENR_TIM5EN;
     /* Set timer clock prescaler to 0 (source clock divided by 0+1) */
-    TIMER_INJECTOR->PSC &= ~TIM_PSC_PSC;
+    TIMER_INJECTOR->PSC = (uint16_t)0U;
+    /* Select the up counting mode */
+    TIMER_INJECTOR->CR1 &= ~(TIM_CR1_DIR | TIM_CR1_CMS);
+    /* Enable injection channels outputs */
+    TIMER_INJECTOR->CCER |= TIM_CCER_CC1E;
+    TIMER_INJECTOR->CCER |= TIM_CCER_CC2E;
+    TIMER_INJECTOR->CCER |= TIM_CCER_CC3E;
     /* Set one-shot mode */
     TIMER_INJECTOR->CR1 |= TIM_CR1_OPM;
 
@@ -97,6 +103,11 @@ void InjDrv_Init(void)
     TIMER_INJECTOR->DIER |= TIM_DIER_TIE;
     /* Enable update interrupt request */
     TIMER_INJECTOR->DIER |= TIM_DIER_UIE;
+
+#ifdef DEBUG
+    /* Stop timer when core is halted in debug */
+    DBGMCU->APB1FZ |= DBGMCU_APB1_FZ_DBG_TIM5_STOP;
+#endif
 
     NVIC_SetPriority(TIM5_IRQn, 1U);
     NVIC_ClearPendingIRQ(TIM5_IRQn);
@@ -122,11 +133,15 @@ void InjDrv_PrepareInjectionChannel(EnCon_CylinderChannels_T channel, float injA
     engineSpeedRaw = EnCon_GetEngineSpeedRaw();
     angleDifference = UTILS_CIRCULAR_DIFFERENCE(injAngle, startAngle, ENCON_ENGINE_FULL_CYCLE_ANGLE);
 
+    /* Make sure counter register is reset */
+    TIMER_INJECTOR->CNT = 0U;
+
     /* tdelay = TIMx_CCR */
     /* injOpenTimeMs <=> tpulse = TIMx_ARR - TIMx_CCR + 1 */
 
     /* Set total time: tdelay + tpulse - 1 = TIMx_ARR */
-    TIMER_INJECTOR->ARR = Utils_FloatToUint32((angleDifference / ENCON_ONE_TRIGGER_PULSE_ANGLE) * engineSpeedRaw) +
+    TIMER_INJECTOR->ARR = Utils_FloatToUint32((angleDifference / ENCON_ONE_TRIGGER_PULSE_ANGLE) *
+                                              TIMER_SPEED_TIM_MULTIPLIER * engineSpeedRaw) +
                           TIMER_MS_TO_TIMER_REG_VALUE(injOpenTimeMs) - 1U;
 
     /* TIMx_CCR = TIMx_ARR + 1 - tpulse */
@@ -136,14 +151,23 @@ void InjDrv_PrepareInjectionChannel(EnCon_CylinderChannels_T channel, float injA
     {
         case ENCON_CHANNEL_1:
             TIMER_INJECTOR->CCR2 = tmpDelay;
+            INJDRV_ENABLE_INJECTION_CHANNEL_1;
+            INJDRV_DISABLE_INJECTION_CHANNEL_2;
+            INJDRV_DISABLE_INJECTION_CHANNEL_3;
             break;
 
         case ENCON_CHANNEL_2:
             TIMER_INJECTOR->CCR3 = tmpDelay;
+            INJDRV_ENABLE_INJECTION_CHANNEL_2;
+            INJDRV_DISABLE_INJECTION_CHANNEL_1;
+            INJDRV_DISABLE_INJECTION_CHANNEL_3;
             break;
 
         case ENCON_CHANNEL_3:
             TIMER_INJECTOR->CCR4 = tmpDelay;
+            INJDRV_ENABLE_INJECTION_CHANNEL_3;
+            INJDRV_DISABLE_INJECTION_CHANNEL_1;
+            INJDRV_DISABLE_INJECTION_CHANNEL_2;
             break;
 
         default:
@@ -158,26 +182,8 @@ injdrv_prepare_injection_channel_exit:
 /*===========================================================================*
  * Function: InjDrv_StartInjectionModule
  *===========================================================================*/
-void InjDrv_StartInjectionModule(EnCon_CylinderChannels_T channel)
+void InjDrv_StartInjectionModule(void)
 {
-    switch (channel)
-    {
-        case ENCON_CHANNEL_1:
-            INJDRV_ENABLE_INJECTION_CHANNEL_1;
-            break;
-
-        case ENCON_CHANNEL_2:
-            INJDRV_ENABLE_INJECTION_CHANNEL_2;
-            break;
-
-        case ENCON_CHANNEL_3:
-            INJDRV_ENABLE_INJECTION_CHANNEL_3;
-            break;
-
-        default:
-            break;
-    }
-
     /* Start the timer */
     TIMER_INJECTOR->CR1 |= TIM_CR1_CEN;
 }
@@ -198,10 +204,6 @@ extern void TIM5_IRQHandler(void)
     {
         /* Clear interrupt flag */
         TIMER_INJECTOR->SR &= ~TIM_SR_UIF;
-        /* Disable all injection channels */
-        INJDRV_DISABLE_INJECTION_CHANNEL_1;
-        INJDRV_DISABLE_INJECTION_CHANNEL_2;
-        INJDRV_DISABLE_INJECTION_CHANNEL_3;
     }
     else
     {
