@@ -22,13 +22,13 @@
  *
  *===========================================================================*/
 
-#define EXTI_GetPendingTrigger(_TRIGGER_)           (EXTI->PR & (_TRIGGER_))
-#define EXTI_ClearPendingTrigger(_TRIGGER_)         (EXTI->PR |= (_TRIGGER_))
+#define EXTI_GetPendingTrigger(_TRIGGER_)                       (EXTI->PR & (_TRIGGER_))
+#define EXTI_ClearPendingTrigger(_TRIGGER_)                     (EXTI->PR |= (_TRIGGER_))
 
 #if DEBUG
-#define WaitForInterrupt()                            __NOP()
+#define WaitForInterrupt()                                      __NOP()
 #else
-#define WaitForInterrupt()                            __WFI()
+#define WaitForInterrupt()                                      __WFI()
 #endif
 
 #define ITOA(_NUMBER_, _BASE_)                                  Utils_Itoa((_NUMBER_), (_BASE_))
@@ -40,6 +40,10 @@
 #define UTILS_CIRCULAR_ADDITION(_VAL1_, _VAL2_, _LOOP_VAL_)     ((((_VAL1_) + (_VAL2_)) >= (_LOOP_VAL_)) ?       \
                                                                  (((_VAL1_) + (_VAL2_)) - (_LOOP_VAL_)) :        \
                                                                  ((_VAL1_) + (_VAL2_)))
+
+#define UTILS_PERCENTAGE_CONVERTER                              (100U)
+
+#define UTILS_CONVERT_TO_MILI_MULTIPL                           (1000.0F)
 
 /*===========================================================================*
  *

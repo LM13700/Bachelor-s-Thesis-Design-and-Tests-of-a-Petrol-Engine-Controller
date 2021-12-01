@@ -150,21 +150,21 @@ void InjDrv_PrepareInjectionChannel(EnCon_CylinderChannels_T channel, float injA
     switch (channel)
     {
         case ENCON_CHANNEL_1:
-            TIMER_INJECTOR->CCR2 = tmpDelay;
+            TIMER_INJECTOR->CCR1 = tmpDelay;
             INJDRV_ENABLE_INJECTION_CHANNEL_1;
             INJDRV_DISABLE_INJECTION_CHANNEL_2;
             INJDRV_DISABLE_INJECTION_CHANNEL_3;
             break;
 
         case ENCON_CHANNEL_2:
-            TIMER_INJECTOR->CCR3 = tmpDelay;
+            TIMER_INJECTOR->CCR2 = tmpDelay;
             INJDRV_ENABLE_INJECTION_CHANNEL_2;
             INJDRV_DISABLE_INJECTION_CHANNEL_1;
             INJDRV_DISABLE_INJECTION_CHANNEL_3;
             break;
 
         case ENCON_CHANNEL_3:
-            TIMER_INJECTOR->CCR4 = tmpDelay;
+            TIMER_INJECTOR->CCR3 = tmpDelay;
             INJDRV_ENABLE_INJECTION_CHANNEL_3;
             INJDRV_DISABLE_INJECTION_CHANNEL_1;
             INJDRV_DISABLE_INJECTION_CHANNEL_2;

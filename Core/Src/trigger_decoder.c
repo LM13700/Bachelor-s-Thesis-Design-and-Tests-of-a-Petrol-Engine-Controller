@@ -170,7 +170,7 @@ void TIM3_IRQHandler(void)
             }
         }
 
-        SWO_Print("%u Angle \n", (uint16_t)trigd_engine_angle);
+        // SWO_Print("%u Angle \n", (uint16_t)trigd_engine_angle);
 
         EnCon_UpdateEngineAngle(trigd_engine_angle);
         lastCapturedValue = TRIGD_SPEED_TIMER_REGISTER;
