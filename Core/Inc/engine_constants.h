@@ -47,7 +47,7 @@
 
 /* Angle of engine used for synchronisation */
 /* This angle is set at first speed signal after sync signal */
-#define ENCON_TRIGGER_ANGLE                     (300.0F)
+#define ENCON_TRIGGER_ANGLE                     (360.0F)
 /* This is number of trigger wheel teeth spinning with crank speed */
 /* Wheel spins with cam speed (2 x crank speed), so real number is divided by 2 */
 #define ENCON_TRIGGER_WHEEL_TEETH_NO            (30.0F)
@@ -61,7 +61,7 @@
 #define ENCON_INJECTOR_FLOW_RATE_CC_MIN         (150.0F)
 #define ENCON_INJECTOR_DEAD_TIME_MS             (0.0F)
 
-#define ENCON_CRANKING_FLOOR_RPM                (250.0F)
+#define ENCON_CRANKING_FLOOR_RPM                (200.0F)
 #define ENCON_RUNNING_FLOOR_RPM                 (400.0F)
 
 /* Angle offset after beggining of the intake stroke, at which injector will be opened */

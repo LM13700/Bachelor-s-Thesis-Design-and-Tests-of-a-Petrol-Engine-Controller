@@ -114,7 +114,7 @@ static const float spden_intake_beggining_angles[ENCON_ENGINE_PISTONS_NO] =
 {
     SPDEN_PISTON_1_INTAKE_ANGLE + ENCON_FUEL_DELIVERY_OFFSET_ANGLE,
     SPDEN_PISTON_2_INTAKE_ANGLE + ENCON_FUEL_DELIVERY_OFFSET_ANGLE,
-    SPDEN_PISTON_3_INTAKE_ANGLE + ENCON_FUEL_DELIVERY_OFFSET_ANGLE,
+    SPDEN_PISTON_3_INTAKE_ANGLE + ENCON_FUEL_DELIVERY_OFFSET_ANGLE
 };
 
 /* Ignition event is calculated when previous piston work cycle ends */
@@ -122,7 +122,7 @@ static const float spden_ignition_calc_angles[ENCON_ENGINE_PISTONS_NO] =
 {
     ENCON_ENGINE_PISTON_3_OFFSET,
     ENCON_ENGINE_PISTON_1_OFFSET,
-    ENCON_ENGINE_PISTON_2_OFFSET,
+    ENCON_ENGINE_PISTON_2_OFFSET
 };
 
 /* Injection event is calculated when previous piston intake cycle ends */
