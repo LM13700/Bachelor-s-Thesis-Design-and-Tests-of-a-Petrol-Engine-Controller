@@ -72,7 +72,7 @@ int main(void)
     Main_CallInits();
     EnSens_StartMeas();
 
-    while(1)
+    while (1)
     {
         WaitForInterrupt();
         if (main_is_speed_trigger_occured)

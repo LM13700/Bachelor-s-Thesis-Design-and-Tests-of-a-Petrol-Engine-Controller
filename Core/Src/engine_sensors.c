@@ -61,63 +61,69 @@ static uint16_t ensens_sensors_data[ENSENS_DATA_INDEX_COUNT];
  *===========================================================================*/
 void EnSens_Init(void)
 {
-    /* MAP pin: PA7 */
-    /* IAT pin: PA8 */
-    /* CLT pin: PA9 */
+    /* MAP pin: PA5 (ADC1_5) */
+    /* IAT pin: PA7 (ADC1_7) */
+    /* CLT pin: PB0 (ADC1_8) */
 
     /* Enable ADC clock */
     RCC->APB2ENR |= RCC_APB2ENR_ADC1EN;
     /* Enable GPIOA clock */
     RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN;
+    /* Enable GPIOB clock */
+    RCC->AHB1ENR |= RCC_AHB1ENR_GPIOBEN;
+    /* Set port PA5 in analog mode */
+    GPIOA->MODER |= GPIO_MODER_MODER5;
     /* Set port PA7 in analog mode */
     GPIOA->MODER |= GPIO_MODER_MODER7;
-    /* Set port PA8 in analog mode */
-    GPIOA->MODER |= GPIO_MODER_MODER8;
-    /* Set port PA9 in analog mode */
-    GPIOA->MODER |= GPIO_MODER_MODER9;
+    /* Set port PB0 in analog mode */
+    GPIOB->MODER |= GPIO_MODER_MODER0;
 
     /* Set ADC clock to 25[MHz] (100MHz / 4) */
     ADC->CCR |= ADC_CCR_ADCPRE_0;
 
-    /* Set ADC resolution to 8bits */
-    ADC1->CR1 |= ADC_CR1_RES_1;
+    /* Set ADC resolution to 12bits */
+    ADC1->CR1 &= ~ADC_CR1_RES;
     /* Enable scan mode */
     ADC1->CR1 |= ADC_CR1_SCAN;
 
-    // /* Set single conversion mode */
+    /* Set single conversion mode */
     // ADC1->CR2 &= ~ADC_CR2_CONT;
     /* Enable continous conversion mode */
     ADC1->CR2 |= ADC_CR2_CONT;
     /* Set End Of Conversion flag at the end of each conversion*/
     ADC1->CR2 |= ADC_CR2_EOCS;
+    /* Set right data alignment */
+    ADC1->CR2 &= ~ADC_CR2_ALIGN;
     /* Enable DMA */
     ADC1->CR2 |= ADC_CR2_DMA;
-    // /* Disable continuous DMA requests */
+    /* Disable continuous DMA requests */
     // ADC1->CR2 &= ~ADC_CR2_DDS;
     /* Enable continuous DMA requests */
     ADC1->CR2 |= ADC_CR2_DDS;
-    /* Set right data alignment */
-    ADC1->CR2 &= ~ADC_CR2_ALIGN;
 
+    /* Set channel 5 sample time to 3 cycles */
+    ADC1->SMPR2 &= ~ADC_SMPR2_SMP5;
     /* Set channel 7 sample time to 3 cycles */
     ADC1->SMPR2 &= ~ADC_SMPR2_SMP7;
     /* Set channel 8 sample time to 3 cycles */
     ADC1->SMPR2 &= ~ADC_SMPR2_SMP8;
-    /* Set channel 9 sample time to 3 cycles */
-    ADC1->SMPR2 &= ~ADC_SMPR2_SMP9;
 
     /* Set total conversion number to 3 */
     ADC1->SQR1 |= ADC_SQR1_L_1;
+
     /* Select regular channels sequence */
-    /* Set channel 7 as 1st */
-    ADC1->SQR3 |= (0x07 << ADC_SQR3_SQ1_Pos);
-    /* Set channel 8 as 2nd */
-    ADC1->SQR3 |= (0x08 << ADC_SQR3_SQ2_Pos);
-    /* Set channel 9 as 3rd */
-    ADC1->SQR3 |= (0x09 << ADC_SQR3_SQ3_Pos);
+    /* Set channel 5 as 1st */
+    ADC1->SQR3 |= (0x05 << ADC_SQR3_SQ1_Pos);
+    /* Set channel 7 as 2nd */
+    ADC1->SQR3 |= (0x07 << ADC_SQR3_SQ2_Pos);
+    /* Set channel 8 as 3rd */
+    ADC1->SQR3 |= (0x08 << ADC_SQR3_SQ3_Pos);
 
     /* Enable AD converter */
     ADC1->CR2 |= ADC_CR2_ADON;
+
+    // uint32_t delay = 10000;
+    // while (delay--);
 
     /* Enable DMA2 clock */
     RCC->AHB1ENR |= RCC_AHB1ENR_DMA2EN;
