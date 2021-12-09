@@ -68,9 +68,9 @@ static void SWO_InternalPrint(char* const format, va_list args) __attribute__((u
  *===========================================================================*/
 
 /*===========================================================================*
- * Function: SWO_Init
+ * Function: Swo_Init
  *===========================================================================*/
-void SWO_Init(void)
+void Swo_Init(void)
 {
 #ifdef DEBUG
 
@@ -84,9 +84,9 @@ void SWO_Init(void)
 }
 
 /*===========================================================================*
- * Function: SWO_Print
+ * Function: Swo_Print
  *===========================================================================*/
-void SWO_Print(char* format, ...)
+void Swo_Print(char* format, ...)
 {
 #ifdef DEBUG
 
@@ -99,16 +99,16 @@ void SWO_Print(char* format, ...)
 }
 
 /*===========================================================================*
- * Function: SWO_PrintLogInternal
+ * Function: Swo_PrintLogInternal
  *===========================================================================*/
-void SWO_PrintLogInternal(const char* moduleTag, const int codeLine, char* format, ...)
+void Swo_PrintLogInternal(const char* moduleTag, const int codeLine, char* format, ...)
 {
 #ifdef DEBUG
 
     va_list args;
     va_start(args, format);
 
-    SWO_Print("%s %d: ", moduleTag, codeLine);
+    Swo_Print("%s %d: ", moduleTag, codeLine);
 
     SWO_InternalPrint(format, args);
 

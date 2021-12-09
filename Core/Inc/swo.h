@@ -22,10 +22,10 @@
  *
  *===========================================================================*/
 
-#define SWO_DefineModuleTag(_TAG_)    static const char module_tag[] __attribute__((used)) = #_TAG_
+#define Swo_DefineModuleTag(_TAG_)    static const char module_tag[] __attribute__((used)) = #_TAG_
 
 #ifdef __GNUC__
-    #define SWO_PrintLog(...)         SWO_PrintLogInternal(module_tag, __LINE__, __VA_ARGS__)
+    #define Swo_PrintLog(...)         Swo_PrintLogInternal(module_tag, __LINE__, __VA_ARGS__)
 #endif
 
 /*===========================================================================*
@@ -53,7 +53,7 @@
  * return:      None
  * details:     None
  *===========================================================================*/
-void SWO_Init(void);
+void Swo_Init(void);
 
 /*===========================================================================*
  * brief:       SWO printf alike implementation
@@ -63,7 +63,7 @@ void SWO_Init(void);
  * return:      None
  * details:     None
  *===========================================================================*/
-void SWO_Print(char* format, ...) __attribute__ ((__format__(printf, 1, 2)));
+void Swo_Print(char* format, ...) __attribute__ ((__format__(printf, 1, 2)));
 
 /*===========================================================================*
  * brief:       SWO printf wrapper allowing logging the calling module name and line num
@@ -75,7 +75,7 @@ void SWO_Print(char* format, ...) __attribute__ ((__format__(printf, 1, 2)));
  * return:      None
  * details:     It is recommended to use this function only via macro Debug_PrintLog
  *===========================================================================*/
-void SWO_PrintLogInternal(const char* moduleTag, const int codeLine, char* format, ...)
+void Swo_PrintLogInternal(const char* moduleTag, const int codeLine, char* format, ...)
                           __attribute__ ((__format__(printf, 3, 4)));
 
 

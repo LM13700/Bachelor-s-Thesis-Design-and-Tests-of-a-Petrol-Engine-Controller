@@ -14,13 +14,14 @@
 
 #include "main.h"
 
+#include "engine_sensors.h"
 #include "ignition_driver.h"
 #include "injection_driver.h"
-#include "swo.h"
 #include "speed_density.h"
+#include "swo.h"
 #include "trigger_decoder.h"
 
-SWO_DefineModuleTag(MAIN);
+Swo_DefineModuleTag(MAIN);
 
 /*===========================================================================*
  *
@@ -69,6 +70,7 @@ void Main_CallInits(void);
 int main(void)
 {
     Main_CallInits();
+    EnSens_StartMeas();
 
     while(1)
     {
@@ -94,10 +96,11 @@ void Main_CallInits(void)
 {
     DisableIRQ();
 
-    SWO_Init();
+    Swo_Init();
     TrigD_Init(SpDen_TriggerCallback);
     IgnDrv_Init();
     InjDrv_Init();
+    EnSens_Init();
     SpDen_Init();
 
     /* Debug pin PC13 */

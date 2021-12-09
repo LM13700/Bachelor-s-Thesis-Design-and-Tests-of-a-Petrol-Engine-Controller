@@ -18,7 +18,7 @@
 #include "swo.h"
 #include "timers.h"
 
-SWO_DefineModuleTag(TRIGD);
+Swo_DefineModuleTag(TRIGD);
 
 /*===========================================================================*
  *
@@ -170,7 +170,7 @@ void TIM3_IRQHandler(void)
             }
         }
 
-        // SWO_Print("%u Angle \n", (uint16_t)trigd_engine_angle);
+        // Swo_Print("%u Angle \n", (uint16_t)trigd_engine_angle);
 
         EnCon_UpdateEngineAngle(trigd_engine_angle);
         lastCapturedValue = TRIGD_SPEED_TIMER_REGISTER;
@@ -201,7 +201,7 @@ void TIM3_IRQHandler(void)
         /* Do nothing*/
     }
 
-    // SWO_Print("%u RPM \n", (uint16_t)EnCon_GetEngineSpeed());
+    // Swo_Print("%u RPM \n", (uint16_t)EnCon_GetEngineSpeed());
 }
 
 /*===========================================================================*

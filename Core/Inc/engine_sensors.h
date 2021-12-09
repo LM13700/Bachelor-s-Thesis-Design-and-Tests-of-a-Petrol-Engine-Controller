@@ -14,6 +14,8 @@
  *
  *===========================================================================*/
 
+#include "common_include.h"
+
 /*===========================================================================*
  *
  * EXPORTED DEFINES AND MACRO SECTION
@@ -47,6 +49,24 @@ typedef enum EnSens_CltResultType_Tag
  * EXPORTED FUNCTION DECLARATION SECTION
  *
  *===========================================================================*/
+
+/*===========================================================================*
+ * brief:       Initialize engine sensors module
+ * param[in]:   None
+ * param[out]:  None
+ * return:      None
+ * details:     None
+ *===========================================================================*/
+void EnSens_Init(void);
+
+/*===========================================================================*
+ * brief:       Start sensors measurement
+ * param[in]:   None
+ * param[out]:  None
+ * return:      None
+ * details:     None
+ *===========================================================================*/
+void EnSens_StartMeas(void);
 
 /*===========================================================================*
  * brief:       Gets MAP value
