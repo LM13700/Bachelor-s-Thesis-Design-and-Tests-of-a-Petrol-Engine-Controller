@@ -206,6 +206,9 @@ void SpDen_OnTriggerInterrupt(void)
     float engineAngle;
     float fuelPulseMs;
     float sparkAngle;
+    bool isSensorsMeasureRequired;
+
+    isSensorsMeasureRequired = true;
 
     SpDen_CheckCurrentEngineState();
 
@@ -230,6 +233,8 @@ void SpDen_OnTriggerInterrupt(void)
             spden_pending_ignition_event = channel;
 
             EnableIRQ();
+
+            isSensorsMeasureRequired = false;
         }
 
         /* Check for injection event */
@@ -251,7 +256,14 @@ void SpDen_OnTriggerInterrupt(void)
             spden_pending_injection_event = channel;
 
             EnableIRQ();
+
+            isSensorsMeasureRequired = false;
         }
+    }
+
+    if (isSensorsMeasureRequired)
+    {
+        EnSens_StartMeasurement();
     }
 }
 
@@ -364,7 +376,7 @@ static float SpDen_CalculateFuel(float speed, float pressure)
 
     correctionMultiplier += EnSens_GetClt(ENSENS_CLT_RESULT_TYPE_ENRICHEMENT);
 
-    return ((((Tables_GetSpeedPressureTableValue(TABLES_SPEED_PRESSURE_VE, speed, pressure) / (float)UTILS_PERCENTAGE_CONVERTER) * (SPDEN_AIR_MASS(EnSens_GetMap(), EnSens_GetIat()) / SPDEN_TARGET_AFR)) /
+    return ((((Tables_Get3DTableValue(TABLES_3D_VE, speed, pressure) / (float)UTILS_PERCENTAGE_CONVERTER) * (SPDEN_AIR_MASS(EnSens_GetMap(), EnSens_GetIat()) / SPDEN_TARGET_AFR)) /
            (SPDEN_FUEL_DENSITY * SPDEN_INJECTOR_FLOW_RATE_CC_SEC)) * 1000.0F +
              ENCON_INJECTOR_DEAD_TIME_MS) * correctionMultiplier;
 }
@@ -382,7 +394,7 @@ static float SpDen_CalculateSpark(float speed, float pressure, EnCon_CylinderCha
     }
     else
     {
-        tableAngle = Tables_GetSpeedPressureTableValue(TABLES_SPEED_PRESSURE_SPARK, speed, pressure);
+        tableAngle = Tables_Get3DTableValue(TABLES_3D_SPARK, speed, pressure);
     }
 
     return UTILS_CIRCULAR_DIFFERENCE(spden_work_tdc_angles[channel], tableAngle, ENCON_ENGINE_FULL_CYCLE_ANGLE);

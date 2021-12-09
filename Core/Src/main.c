@@ -70,7 +70,6 @@ void Main_CallInits(void);
 int main(void)
 {
     Main_CallInits();
-    EnSens_StartMeas();
 
     while (1)
     {
@@ -103,10 +102,12 @@ void Main_CallInits(void)
     EnSens_Init();
     SpDen_Init();
 
-    /* Debug pin PC13 */
+#if DEBUG
+    /* Debug pin PC13 init */
+    /* Toggle pin: GPIOC->ODR ^= GPIO_ODR_OD13; */
     RCC->AHB1ENR |= RCC_AHB1ENR_GPIOCEN;
     GPIOC->MODER |= GPIO_MODER_MODE13_0;
-    /* Toggle pin: GPIOC->ODR ^= GPIO_ODR_OD13; */
+#endif
 
     main_is_speed_trigger_occured = false;
 

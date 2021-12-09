@@ -66,7 +66,7 @@ void EnSens_Init(void);
  * return:      None
  * details:     None
  *===========================================================================*/
-void EnSens_StartMeas(void);
+void EnSens_StartMeasurement(void);
 
 /*===========================================================================*
  * brief:       Gets MAP value

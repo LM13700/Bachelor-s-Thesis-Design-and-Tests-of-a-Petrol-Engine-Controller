@@ -28,20 +28,27 @@
  *
  *===========================================================================*/
 
-typedef enum Tables_SpeedPressure_Tag
+typedef enum Tables_3D_Tag
 {
-    TABLES_SPEED_PRESSURE_VE,
-    TABLES_SPEED_PRESSURE_SPARK,
+    /* x-axis -> engine speed in [RPM], y-axis -> engine pressure in [kPa] */
+    TABLES_3D_VE,
+    /* x-axis -> engine speed in [RPM], y-axis -> engine pressure in [kPa] */
+    TABLES_3D_SPARK,
 
-    TABLES_SPEED_PRESSURE_COUNT
-} Tables_SpeedPressure_T;
+    TABLES_3D_COUNT
+} Tables_3D_T;
 
-typedef enum Tables_TwoDimensions_Tag
+typedef enum Tables_2D_Tag
 {
-    TABLES_TWO_DIMENSIONS_CLT_ENRICH,
+    /* x-axis -> voltage in [mV] */
+    TABLES_2D_IAT,
+    /* x-axis -> voltage in [mV] */
+    TABLES_2D_CLT,
+    /* x-axis -> temperature [oC] */
+    TABLES_2D_CLT_ENRICHEMENT,
 
-    TABLES_TWO_DIMENSIONS_COUNT
-} Tables_TwoDimensions_T;
+    TABLES_2S_COUNT
+} Tables_2D_T;
 
 /*===========================================================================*
  *
@@ -56,15 +63,15 @@ typedef enum Tables_TwoDimensions_Tag
  *===========================================================================*/
 
 /*===========================================================================*
- * brief:       Gets speed pressure table z-axis value for given engine speed and pressure
+ * brief:       Gets 3D table z-axis value for given x-axis and y-axis values
  * param[in]:   tableType - specifies which table will be read
- * param[in]:   speed - engine speed in [RPM]
- * param[in]:   pressure - engine pressure in [kPa]
+ * param[in]:   xValue - x-axis value specific for given table type
+ * param[in]:   yValue - y-axis value specific for given table type
  * param[out]:  None
  * return:      float - z-axis value
- * details:     None
+ * details:     Look in Tables_3D_T for table specific axis values units
  *===========================================================================*/
-float Tables_GetSpeedPressureTableValue(Tables_SpeedPressure_T tableType, float speed, float pressure);
+float Tables_Get3DTableValue(Tables_3D_T tableType, float xValue, float yValue);
 
 /*===========================================================================*
  * brief:       Gets 2D table value for given x-axis value
@@ -72,9 +79,9 @@ float Tables_GetSpeedPressureTableValue(Tables_SpeedPressure_T tableType, float 
  * param[in]:   xValue - x-axis value specific for given table type
  * param[out]:  None
  * return:      float - y-axis value
- * details:     None
+ * details:     Look in Tables_2D_T for table specific axis values units
  *===========================================================================*/
-float Tables_GetTwoDimensionsTableValue(Tables_TwoDimensions_T tableType, float xValue);
+float Tables_Get2DTableValue(Tables_2D_T tableType, float xValue);
 
 
 #endif

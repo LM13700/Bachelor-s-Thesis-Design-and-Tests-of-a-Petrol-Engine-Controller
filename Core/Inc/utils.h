@@ -45,6 +45,11 @@
 
 #define UTILS_CONVERT_TO_MILI_MULTIPL                           (1000.0F)
 
+/* Convert Kelvins to Celsius */
+#define UTILS_CONVERT_K_TO_C(_K_)                               (((float)(_K_)) - 273.15F)
+/* Convert Celsius to Kelvins */
+#define UTILS_CONVERT_C_TO_K(_C_)                               (((float)(_C_)) + 273.15F)
+
 /*===========================================================================*
  *
  * EXPORTED TYPES AND ENUMERATION SECTION

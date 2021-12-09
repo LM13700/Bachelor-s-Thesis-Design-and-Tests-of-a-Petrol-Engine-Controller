@@ -14,11 +14,23 @@
 
 #include "engine_sensors.h"
 
+#include "tables.h"
+
 /*===========================================================================*
  *
  * DEFINES AND MACRO SECTION
  *
  *===========================================================================*/
+
+#define ENSENS_ADC_12_BIT_RESOLUTION            (4096U)
+#define ENSENS_ADC_REFERENCE_VOLTAGE_V          (3.3F)
+#define ENSENS_ADC_REFERENCE_VOLTAGE_MV         (3300.0F)
+
+#define ENSENS_ADC_CALCULATE_VOLTAGE_MV(_REG_)  ((((float)(_REG_)) / ENSENS_ADC_12_BIT_RESOLUTION) *        \
+                                                 ENSENS_ADC_REFERENCE_VOLTAGE_MV)
+
+/* Pierburg 7.18222.01.0 MAP sensor */
+#define ENSENS_CALCULATE_MAP_KPA(_MV_)          ((((float)(_MV_)) * 0.0280643351F + 10.1656376410F))
 
 /*===========================================================================*
  *
@@ -42,13 +54,31 @@ typedef enum EnSens_DataIndex_Tag
  *
  *===========================================================================*/
 
-static uint16_t ensens_sensors_data[ENSENS_DATA_INDEX_COUNT];
+static volatile uint16_t ensens_sensors_data[ENSENS_DATA_INDEX_COUNT];
 
 /*===========================================================================*
  *
  * LOCAL FUNCTION DECLARATION SECTION
  *
  *===========================================================================*/
+
+/*===========================================================================*
+ * brief:       ADC Interrupt request handler
+ * param[in]:   None
+ * param[out]:  None
+ * return:      None
+ * details:     None
+ *===========================================================================*/
+extern void ADC_IRQHandler(void);
+
+/*===========================================================================*
+ * brief:       DMA2 Stream0 Interrupt request handler
+ * param[in]:   None
+ * param[out]:  None
+ * return:      None
+ * details:     None
+ *===========================================================================*/
+extern void DMA2_Stream0_IRQHandler(void);
 
 /*===========================================================================*
  *
@@ -87,9 +117,7 @@ void EnSens_Init(void)
     ADC1->CR1 |= ADC_CR1_SCAN;
 
     /* Set single conversion mode */
-    // ADC1->CR2 &= ~ADC_CR2_CONT;
-    /* Enable continous conversion mode */
-    ADC1->CR2 |= ADC_CR2_CONT;
+    ADC1->CR2 &= ~ADC_CR2_CONT;
     /* Set End Of Conversion flag at the end of each conversion*/
     ADC1->CR2 |= ADC_CR2_EOCS;
     /* Set right data alignment */
@@ -97,7 +125,7 @@ void EnSens_Init(void)
     /* Enable DMA */
     ADC1->CR2 |= ADC_CR2_DMA;
     /* Disable continuous DMA requests */
-    // ADC1->CR2 &= ~ADC_CR2_DDS;
+    ADC1->CR2 &= ~ADC_CR2_DDS;
     /* Enable continuous DMA requests */
     ADC1->CR2 |= ADC_CR2_DDS;
 
@@ -121,9 +149,6 @@ void EnSens_Init(void)
 
     /* Enable AD converter */
     ADC1->CR2 |= ADC_CR2_ADON;
-
-    // uint32_t delay = 10000;
-    // while (delay--);
 
     /* Enable DMA2 clock */
     RCC->AHB1ENR |= RCC_AHB1ENR_DMA2EN;
@@ -153,9 +178,9 @@ void EnSens_Init(void)
 }
 
 /*===========================================================================*
- * Function: EnSens_StartMeas
+ * Function: EnSens_StartMeasurement
  *===========================================================================*/
-void EnSens_StartMeas(void)
+void EnSens_StartMeasurement(void)
 {
     /* Clear status register */
     ADC1->SR = 0x00;
@@ -168,7 +193,7 @@ void EnSens_StartMeas(void)
  *===========================================================================*/
 float EnSens_GetMap(void)
 {
-    return 100.0F;
+    return ENSENS_CALCULATE_MAP_KPA(ENSENS_ADC_CALCULATE_VOLTAGE_MV(ensens_sensors_data[ENSENS_DATA_INDEX_MAP]));
 }
 
 /*===========================================================================*
@@ -176,7 +201,12 @@ float EnSens_GetMap(void)
  *===========================================================================*/
 float EnSens_GetIat(void)
 {
-    return 300.0F;
+    float iatCelsius;
+
+    iatCelsius = Tables_Get2DTableValue(TABLES_2D_IAT,
+                                        ENSENS_ADC_CALCULATE_VOLTAGE_MV(ensens_sensors_data[ENSENS_DATA_INDEX_IAT]));
+
+    return UTILS_CONVERT_C_TO_K(iatCelsius);
 }
 
 /*===========================================================================*
@@ -184,19 +214,28 @@ float EnSens_GetIat(void)
  *===========================================================================*/
 float EnSens_GetClt(EnSens_CltResultTypes_T resultType)
 {
+    float result;
+    float cltCelsius;
+
+    cltCelsius = Tables_Get2DTableValue(TABLES_2D_CLT,
+                                        ENSENS_ADC_CALCULATE_VOLTAGE_MV(ensens_sensors_data[ENSENS_DATA_INDEX_CLT]));
+
     switch (resultType)
     {
         case ENSENS_CLT_RESULT_TYPE_TEMPERATURE:
+            result = UTILS_CONVERT_C_TO_K(cltCelsius);
             break;
         
         case ENSENS_CLT_RESULT_TYPE_ENRICHEMENT:
+            result = Tables_Get2DTableValue(TABLES_2D_CLT_ENRICHEMENT, cltCelsius);
             break;
 
         default:
+            result = 0.0F;
             break;
     }
 
-    return 0.0F;
+    return result;
 }
 
 /*===========================================================================*
@@ -204,6 +243,33 @@ float EnSens_GetClt(EnSens_CltResultTypes_T resultType)
  * LOCAL FUNCTION DEFINITION SECTION
  *
  *===========================================================================*/
+
+/*===========================================================================*
+ * Function: ADC_IRQHandler
+ *===========================================================================*/
+extern void ADC_IRQHandler(void)
+{
+    /* ADC overrun occured */
+    if (ADC1->SR & ADC_SR_OVR)
+    {
+        /* Reinitialize number of data registers */
+        DMA2_Stream0->NDTR = ENSENS_DATA_INDEX_COUNT;
+        /* Reinitialize peripherial adress */
+        DMA2_Stream0->PAR = (uint32_t)&ADC1->DR;
+        /* Reinitialize memory adress */
+        DMA2_Stream0->M0AR = (uint32_t)&ensens_sensors_data[0];
+        /* Clean overrun bit */
+        ADC1->SR &= ~ADC_SR_OVR;
+    }
+}
+
+/*===========================================================================*
+ * Function: DMA2_Stream0_IRQHandler
+ *===========================================================================*/
+extern void DMA2_Stream0_IRQHandler(void)
+{
+    
+}
 
 
 /* end of file */
