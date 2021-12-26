@@ -19,7 +19,6 @@
 #include "ignition_driver.h"
 #include "injection_driver.h"
 #include "tables.h"
-#include "string.h"
 
 /*===========================================================================*
  *
