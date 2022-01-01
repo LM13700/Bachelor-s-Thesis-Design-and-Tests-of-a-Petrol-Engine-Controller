@@ -253,7 +253,7 @@ static void TrigD_SpeedPinInit(void)
     /* Enable timer clock*/
     RCC->APB1ENR |= RCC_APB1ENR_TIM3EN;
 
-    /* Set timer clock prescaler to 0 (source clock divided by 0+1) */
+    /* Set timer clock prescaler to 100 (1MHz) */
     TIMER_SPEED->PSC |= TIMER_SPEED_PRESCALER;
     /* Set timer auto-reload register to its max value */
     TIMER_SPEED->ARR |= TIM_ARR_ARR;

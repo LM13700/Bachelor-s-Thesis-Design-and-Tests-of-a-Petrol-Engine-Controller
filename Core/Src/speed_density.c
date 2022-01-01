@@ -375,9 +375,10 @@ static float SpDen_CalculateFuel(float speed, float pressure)
 
     correctionMultiplier += EnSens_GetClt(ENSENS_CLT_RESULT_TYPE_ENRICHEMENT);
 
-    return ((((Tables_Get3DTableValue(TABLES_3D_VE, speed, pressure) / (float)UTILS_PERCENTAGE_CONVERTER) * (SPDEN_AIR_MASS(EnSens_GetMap(), EnSens_GetIat()) / SPDEN_TARGET_AFR)) /
-           (SPDEN_FUEL_DENSITY * SPDEN_INJECTOR_FLOW_RATE_CC_SEC)) * 1000.0F +
-             ENCON_INJECTOR_DEAD_TIME_MS) * correctionMultiplier;
+    return ((((Tables_Get3DTableValue(TABLES_3D_VE, speed, pressure) / (float)UTILS_PERCENTAGE_CONVERTER) *
+              (SPDEN_AIR_MASS(EnSens_GetMap(), EnSens_GetIat()) / SPDEN_TARGET_AFR)) /
+              (SPDEN_FUEL_DENSITY * SPDEN_INJECTOR_FLOW_RATE_CC_SEC)) * 1000.0F + ENCON_INJECTOR_DEAD_TIME_MS) *
+              correctionMultiplier;
 }
 
 /*===========================================================================*
