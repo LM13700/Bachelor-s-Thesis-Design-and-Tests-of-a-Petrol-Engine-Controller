@@ -49,7 +49,7 @@
  * return:      None
  * details:     None
  *===========================================================================*/
-static void SWO_PutS(const char* string);
+static void SWO_PutS(const char* string) __attribute__((used));
 
 /*===========================================================================*
  * brief:       Internal print function - vprintf alike
@@ -59,7 +59,7 @@ static void SWO_PutS(const char* string);
  * return:      None
  * details:     va_end is called at the end of the function
  *===========================================================================*/
-static void SWO_InternalPrint(char* const format, va_list args);
+static void SWO_InternalPrint(char* const format, va_list args) __attribute__((used));
 
 /*===========================================================================*
  *
@@ -68,9 +68,9 @@ static void SWO_InternalPrint(char* const format, va_list args);
  *===========================================================================*/
 
 /*===========================================================================*
- * Function: SWO_Init
+ * Function: Swo_Init
  *===========================================================================*/
-void SWO_Init(void)
+void Swo_Init(void)
 {
 #ifdef DEBUG
 
@@ -84,9 +84,9 @@ void SWO_Init(void)
 }
 
 /*===========================================================================*
- * Function: SWO_Print
+ * Function: Swo_Print
  *===========================================================================*/
-void SWO_Print(char* format, ...)
+void Swo_Print(char* format, ...)
 {
 #ifdef DEBUG
 
@@ -99,16 +99,16 @@ void SWO_Print(char* format, ...)
 }
 
 /*===========================================================================*
- * Function: SWO_PrintLogInternal
+ * Function: Swo_PrintLogInternal
  *===========================================================================*/
-void SWO_PrintLogInternal(const char* moduleTag, const int codeLine, char* format, ...)
+void Swo_PrintLogInternal(const char* moduleTag, const int codeLine, char* format, ...)
 {
 #ifdef DEBUG
 
     va_list args;
     va_start(args, format);
 
-    SWO_Print("%s %d: ", moduleTag, codeLine);
+    Swo_Print("%s %d: ", moduleTag, codeLine);
 
     SWO_InternalPrint(format, args);
 
@@ -126,6 +126,7 @@ void SWO_PrintLogInternal(const char* moduleTag, const int codeLine, char* forma
  *===========================================================================*/
 static void SWO_PutS(const char* string)
 {
+#ifdef DEBUG
     unsigned int index = 0;
 
     while (string[index])
@@ -134,6 +135,7 @@ static void SWO_PutS(const char* string)
 
         index++;
     }
+#endif
 }
 
 /*===========================================================================*
@@ -141,6 +143,7 @@ static void SWO_PutS(const char* string)
  *===========================================================================*/
 static void SWO_InternalPrint(char* const format, va_list args)
 {
+#ifdef DEBUG
     char* inputCh;
     int32_t value;
 
@@ -162,6 +165,17 @@ static void SWO_InternalPrint(char* const format, va_list args)
                 case 'd':
                 {
                     value = va_arg(args, int);
+                    if (value < 0)
+                    {
+                        value *= -1;
+                        SWO_PutChar('-');
+                    }
+                    SWO_PutS(ITOA(value, 10));
+                    break;
+                }
+                case 'u':
+                {
+                    value = va_arg(args, uint32_t);
 
                     if (value < 0)
                     {
@@ -175,7 +189,7 @@ static void SWO_InternalPrint(char* const format, va_list args)
                 /* Hexadecimal */
                 case 'x':
                 {
-                    value = va_arg(args, unsigned int);
+                    value = va_arg(args, uint32_t);
                     SWO_PutS(ITOA(value, 16));
                     break;
                 }
@@ -207,6 +221,7 @@ static void SWO_InternalPrint(char* const format, va_list args)
     } while (*inputCh != '\0');
 
     va_end(args);
+#endif
 }
 
 

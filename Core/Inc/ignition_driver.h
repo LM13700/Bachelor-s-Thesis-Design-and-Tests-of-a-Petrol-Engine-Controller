@@ -1,12 +1,12 @@
 /*===========================================================================*
- * File:        trigger_decoder.h
+ * File:        ignition_driver.h
  * Project:     ECU
  * Author:      Mateusz Mroz
- * Date:        24.10.2021
- * Brief:       Trigger decoder
+ * Date:        09.11.2021
+ * Brief:       Ignition colis driver module
  *===========================================================================*/
-#ifndef _TRIGGER_DECODER_H_
-#define _TRIGGER_DECODER_H_
+#ifndef _IGNITION_DRIVER_H_
+#define _IGNITION_DRIVER_H_
 
 /*===========================================================================*
  *
@@ -15,6 +15,8 @@
  *===========================================================================*/
 
 #include "common_include.h"
+
+#include "engine_constants.h"
 
 /*===========================================================================*
  *
@@ -27,8 +29,6 @@
  * EXPORTED TYPES AND ENUMERATION SECTION
  *
  *===========================================================================*/
-
-typedef void (*Trigd_IsrCallback)(void);
 
 /*===========================================================================*
  *
@@ -43,13 +43,33 @@ typedef void (*Trigd_IsrCallback)(void);
  *===========================================================================*/
 
 /*===========================================================================*
- * brief:       Initialize trigger decode module
- * param[in]:   callback - a pointer to the trigger callback function
+ * brief:       Initialize ignition driver module
+ * param[in]:   None
  * param[out]:  None
  * return:      None
  * details:     None
  *===========================================================================*/
-void TrigD_Init(Trigd_IsrCallback callback);
+void IgnDrv_Init(void);
+
+/*===========================================================================*
+ * brief:       Prepere ignition channel
+ * param[in]:   channel - ignition channel to be prepared
+ * param[in]:   fireAngle - engine angle at which ignition need to occure
+ * param[in]:   startAngle - engine angle at which module will be started
+ * param[out]:  None
+ * return:      None
+ * details:     None
+ *===========================================================================*/
+void IgnDrv_PrepareIgnitionChannel(EnCon_CylinderChannels_T channel, float fireAngle, float startAngle);
+
+/*===========================================================================*
+ * brief:       Starts ignition module
+ * param[in]:   None
+ * param[out]:  None
+ * return:      None
+ * details:     It is necessary to previously prepare proper channel via prepare function
+ *===========================================================================*/
+void IgnDrv_StartIgnitionModule(void);
 
 
 #endif

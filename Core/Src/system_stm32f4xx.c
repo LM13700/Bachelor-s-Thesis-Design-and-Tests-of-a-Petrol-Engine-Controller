@@ -181,6 +181,9 @@ static void SetSysClock(void);
   */
 void SystemInit(void)
 {
+  /* Disable pull-up and pull-down for GPIOA port 15 */
+  GPIOA->PUPDR &= ~GPIO_PUPDR_PUPD15;
+
   /* FPU settings ------------------------------------------------------------*/
   #if (__FPU_PRESENT == 1) && (__FPU_USED == 1)
     SCB->CPACR |= ((3UL << 10*2)|(3UL << 11*2));  /* set CP10 and CP11 Full Access */
@@ -373,6 +376,9 @@ static void SetSysClock(void)
 
     /* Wait till the main PLL is used as system clock source */
     while ((RCC->CFGR & (uint32_t)RCC_CFGR_SWS ) != RCC_CFGR_SWS_PLL);
+
+    /* Update global variable */
+    SystemCoreClockUpdate();
   }
   else
   { /* If HSE fails to start-up, the application will have wrong clock

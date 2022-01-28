@@ -1,12 +1,12 @@
 /*===========================================================================*
- * File:        swo.h
+ * File:        engine_sensors.h
  * Project:     ECU
  * Author:      Mateusz Mroz
- * Date:        02.10.2021
- * Brief:       SWO module
+ * Date:        23.11.2021
+ * Brief:       Module containing sensors support
  *===========================================================================*/
-#ifndef _SWO_H_
-#define _SWO_H_
+#ifndef _ENGINE_SENSORS_H_
+#define _ENGINE_SENSORS_H_
 
 /*===========================================================================*
  *
@@ -22,17 +22,21 @@
  *
  *===========================================================================*/
 
-#define Swo_DefineModuleTag(_TAG_)    static const char module_tag[] __attribute__((used)) = #_TAG_
-
-#ifdef __GNUC__
-    #define Swo_PrintLog(...)         Swo_PrintLogInternal(module_tag, __LINE__, __VA_ARGS__)
-#endif
-
 /*===========================================================================*
  *
  * EXPORTED TYPES AND ENUMERATION SECTION
  *
  *===========================================================================*/
+
+typedef enum EnSens_CltResultType_Tag
+{
+    /* Temperature in Kelvin */
+    ENSENS_CLT_RESULT_TYPE_TEMPERATURE,
+    /* Enrichement percentage */
+    ENSENS_CLT_RESULT_TYPE_ENRICHEMENT,
+
+    ENSENS_CLT_RESULT_TYPE_COUNT
+} EnSens_CltResultTypes_T;
 
 /*===========================================================================*
  *
@@ -47,36 +51,58 @@
  *===========================================================================*/
 
 /*===========================================================================*
- * brief:       Initialize SWO interface
+ * brief:       Initialize engine sensors module
  * param[in]:   None
  * param[out]:  None
  * return:      None
  * details:     None
  *===========================================================================*/
-void Swo_Init(void);
+void EnSens_Init(void);
 
 /*===========================================================================*
- * brief:       SWO printf alike implementation
- * param[in]:   format - a string to be written to output
- * param[in]:   ... - additional agruments
+ * brief:       Start sensors measurement
+ * param[in]:   None
  * param[out]:  None
  * return:      None
  * details:     None
  *===========================================================================*/
-void Swo_Print(char* format, ...) __attribute__ ((__format__(printf, 1, 2)));
+void EnSens_StartMeasurement(void);
 
 /*===========================================================================*
- * brief:       SWO printf wrapper allowing logging the calling module name and line num
- * param[in]:   moduleTag - a string containing module name
- * param[in]:   codeLine - the calling module line number
- * param[in]:   format - a string to be written to output
- * param[in]:   ... - additional agruments
+ * brief:       Gets MAP value
+ * param[in]:   None
  * param[out]:  None
- * return:      None
- * details:     It is recommended to use this function only via macro Debug_PrintLog
+ * return:      float - absolute MAP value in kPa
+ * details:     MAP - Manifold Absolute Pressure
  *===========================================================================*/
-void Swo_PrintLogInternal(const char* moduleTag, const int codeLine, char* format, ...)
-                          __attribute__ ((__format__(printf, 3, 4)));
+float EnSens_GetMap(void);
+
+/*===========================================================================*
+ * brief:       Gets IAT value
+ * param[in]:   None
+ * param[out]:  None
+ * return:      float - IAT value in kelvins
+ * details:     IAT - Intake Air Temperature
+ *===========================================================================*/
+float EnSens_GetIat(void);
+
+/*===========================================================================*
+ * brief:       Gets CLT specified value
+ * param[in]:   resultType - what type of result will be returned
+ * param[out]:  None
+ * return:      float - value described in "EnSens_CltResultTypes_T" declaration
+ * details:     CLT - Coolant Temperature
+ *===========================================================================*/
+float EnSens_GetClt(EnSens_CltResultTypes_T resultType);
+
+/*===========================================================================*
+ * brief:       Gets oil pressure
+ * param[in]:   None
+ * param[out]:  None
+ * return:      float - oil pressure in kPa
+ * details:     None
+ *===========================================================================*/
+// float EnSens_GetOilPressure(void);
 
 
 #endif

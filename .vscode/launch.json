@@ -13,8 +13,7 @@
             "servertype": "openocd",
             "device": "STM32F411CEU6",
             "configFiles": [
-                "interface/stlink.cfg",
-                "target/stm32f4x.cfg"
+                "stm32f4x_hardware_reset.cfg"
             ],
             "svdFile": "${workspaceRoot}/STM32F411.svd",
             "breakAfterReset": false,
@@ -43,8 +42,7 @@
             "servertype": "openocd",
             "device": "STM32F411CEU6",
             "configFiles": [
-                "interface/stlink.cfg",
-                "target/stm32f4x.cfg"
+                "stm32f4x_hardware_reset.cfg"
             ],
             "svdFile": "${workspaceRoot}/STM32F411.svd",
             "breakAfterReset": false,

@@ -16,7 +16,9 @@
 
 #include "stm32f411xe.h"
 
+#include "float.h"
 #include "stdbool.h"
+#include "stddef.h"
 #include "stdint.h"
 #include "utils.h"
 
@@ -26,21 +28,8 @@
  *
  *===========================================================================*/
 
-#define EXTI_GetPendingTrigger(_TRIGGER_)           (EXTI->PR & _TRIGGER_)
-#define EXTI_ClearPendingTrigger(_TRIGGER_)         (EXTI->PR |= _TRIGGER_)
-
-/*===========================================================================*
- *
- * EXPORTED TYPES AND ENUMERATION SECTION
- *
- *===========================================================================*/
-
-typedef enum Common_Result_Tag
-{
-    COMMON_OK,
-    COMMON_NOT_OK
-
-} Common_Result_T;
+#define DisableIRQ          (__disable_irq)
+#define EnableIRQ           (__enable_irq)
 
 /*===========================================================================*
  *

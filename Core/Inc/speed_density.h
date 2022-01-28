@@ -1,10 +1,12 @@
 /*===========================================================================*
- * File:        common_include.c
+ * File:        speed_density.h
  * Project:     ECU
  * Author:      Mateusz Mroz
- * Date:        16.09.2021
- * Brief:       Common include
+ * Date:        20.11.2021
+ * Brief:       Module containing speed density method calculations
  *===========================================================================*/
+#ifndef _SPEED_DENSITY_H_
+#define _SPEED_DENSITY_H_
 
 /*===========================================================================*
  *
@@ -16,39 +18,55 @@
 
 /*===========================================================================*
  *
- * DEFINES AND MACRO SECTION
+ * EXPORTED DEFINES AND MACRO SECTION
  *
  *===========================================================================*/
 
 /*===========================================================================*
  *
- * LOCAL TYPES AND ENUMERATION SECTION
+ * EXPORTED TYPES AND ENUMERATION SECTION
  *
  *===========================================================================*/
 
 /*===========================================================================*
  *
- * GLOBAL VARIABLES AND CONSTANTS SECTION
+ * EXPORTED GLOBAL VARIABLES SECTION
  *
  *===========================================================================*/
 
 /*===========================================================================*
  *
- * LOCAL FUNCTION DECLARATION SECTION
+ * EXPORTED FUNCTION DECLARATION SECTION
  *
  *===========================================================================*/
 
 /*===========================================================================*
- *
- * FUNCTION DEFINITION SECTION
- *
+ * brief:       Initialize speed density module
+ * param[in]:   None
+ * param[out]:  None
+ * return:      None
+ * details:     None
  *===========================================================================*/
+void SpDen_Init(void);
 
 /*===========================================================================*
- *
- * LOCAL FUNCTION DEFINITION SECTION
- *
+ * brief:       Function called after trigger interrupt
+ * param[in]:   None
+ * param[out]:  None
+ * return:      None
+ * details:     None
  *===========================================================================*/
+void SpDen_OnTriggerInterrupt(void);
+
+/*===========================================================================*
+ * brief:       Trigger ISR callback
+ * param[in]:   None
+ * param[out]:  None
+ * return:      None
+ * details:     None
+ *===========================================================================*/
+void SpDen_TriggerCallback(void);
 
 
+#endif
 /* end of file */

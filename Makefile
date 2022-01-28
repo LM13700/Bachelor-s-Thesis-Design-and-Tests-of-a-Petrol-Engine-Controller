@@ -21,8 +21,14 @@ RM := del /q
 # C sources
 C_SOURCES =  \
 Core/Src/system_stm32f4xx.c \
+Core/Src/engine_constants.c \
+Core/Src/engine_sensors.c \
+Core/Src/ignition_driver.c \
+Core/Src/injection_driver.c \
 Core/Src/main.c \
+Core/Src/speed_density.c \
 Core/Src/swo.c \
+Core/Src/tables.c \
 Core/Src/trigger_decoder.c \
 Core/Src/utils.c \
 
@@ -84,6 +90,10 @@ AS_DEFS :=
 C_DEFS := \
 -DSTM32F411xE
 
+# General flags
+GFLAGS += -fdata-sections
+GFLAGS += -ffunction-sections
+
 # Warning flags
 WFLAGS += -Wall
 WFLAGS += -Wextra
@@ -102,15 +112,15 @@ WFLAGS += -Wuninitialized
 WFLAGS += -Wunsafe-loop-optimizations
 
 # compile gcc flags
-ASFLAGS += $(MCU) $(AS_DEFS) $(AS_INCLUDES) $(OPT) $(WFLAGS) -fdata-sections -ffunction-sections
+ASFLAGS += $(MCU) $(AS_DEFS) $(AS_INCLUDES) $(OPT) $(WFLAGS) $(GFLAGS)
 
-CFLAGS += $(MCU) $(C_DEFS) $(C_INCLUDES) $(OPT) $(WFLAGS) -fdata-sections -ffunction-sections -std=c99
+CFLAGS += $(MCU) $(C_DEFS) $(C_INCLUDES) $(OPT) $(WFLAGS) $(GFLAGS) -fdiagnostics-color=auto -std=c99
 
 ifeq ($(DEBUG), 1)
 CFLAGS += -g3 -gdwarf-2 -DDEBUG
 OPT += -Og
 else
-OPT += -O2
+OPT += -Ofast
 endif
 
 # Generate dependency information
@@ -178,13 +188,14 @@ clean:
 # Flash
 #######################################
 flash: all
-	openocd -f interface/stlink.cfg -f target/stm32f4x.cfg -c "program $(BUILD_DIR)/$(TARGET).elf verify reset exit"
+	openocd -f stm32f4x_hardware_reset.cfg -c "program $(BUILD_DIR)/$(TARGET).elf verify; reset; exit"
+
 
 #######################################
 # Erase
 #######################################
 erase:
-	openocd -f interface/stlink.cfg -f target/stm32f4x.cfg -c "init; reset halt; flash erase_sector 0 0 last; exit"
+	openocd -f stm32f4x_hardware_reset.cfg -c "init; reset halt; flash erase_sector 0 0 last; exit"
 
 #######################################
 # Dependencies

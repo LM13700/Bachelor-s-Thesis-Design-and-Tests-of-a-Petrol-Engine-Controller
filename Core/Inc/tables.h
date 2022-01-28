@@ -1,12 +1,12 @@
 /*===========================================================================*
- * File:        swo.h
+ * File:        tables.h
  * Project:     ECU
  * Author:      Mateusz Mroz
- * Date:        02.10.2021
- * Brief:       SWO module
+ * Date:        16.11.2021
+ * Brief:       Engine tables
  *===========================================================================*/
-#ifndef _SWO_H_
-#define _SWO_H_
+#ifndef _TABLES_H_
+#define _TABLES_H_
 
 /*===========================================================================*
  *
@@ -22,17 +22,33 @@
  *
  *===========================================================================*/
 
-#define Swo_DefineModuleTag(_TAG_)    static const char module_tag[] __attribute__((used)) = #_TAG_
-
-#ifdef __GNUC__
-    #define Swo_PrintLog(...)         Swo_PrintLogInternal(module_tag, __LINE__, __VA_ARGS__)
-#endif
-
 /*===========================================================================*
  *
  * EXPORTED TYPES AND ENUMERATION SECTION
  *
  *===========================================================================*/
+
+typedef enum Tables_3D_Tag
+{
+    /* x-axis -> engine speed in [RPM], y-axis -> engine pressure in [kPa] */
+    TABLES_3D_VE,
+    /* x-axis -> engine speed in [RPM], y-axis -> engine pressure in [kPa] */
+    TABLES_3D_SPARK,
+
+    TABLES_3D_COUNT
+} Tables_3D_T;
+
+typedef enum Tables_2D_Tag
+{
+    /* x-axis -> voltage in [mV] */
+    TABLES_2D_IAT,
+    /* x-axis -> voltage in [mV] */
+    TABLES_2D_CLT,
+    /* x-axis -> temperature [oC] */
+    TABLES_2D_CLT_ENRICHEMENT,
+
+    TABLES_2S_COUNT
+} Tables_2D_T;
 
 /*===========================================================================*
  *
@@ -47,36 +63,25 @@
  *===========================================================================*/
 
 /*===========================================================================*
- * brief:       Initialize SWO interface
- * param[in]:   None
+ * brief:       Gets 3D table z-axis value for given x-axis and y-axis values
+ * param[in]:   tableType - specifies which table will be read
+ * param[in]:   xValue - x-axis value specific for given table type
+ * param[in]:   yValue - y-axis value specific for given table type
  * param[out]:  None
- * return:      None
- * details:     None
+ * return:      float - z-axis value
+ * details:     Look in Tables_3D_T for table specific axis values units
  *===========================================================================*/
-void Swo_Init(void);
+float Tables_Get3DTableValue(Tables_3D_T tableType, float xValue, float yValue);
 
 /*===========================================================================*
- * brief:       SWO printf alike implementation
- * param[in]:   format - a string to be written to output
- * param[in]:   ... - additional agruments
+ * brief:       Gets 2D table value for given x-axis value
+ * param[in]:   tableType - specifies which table will be read
+ * param[in]:   xValue - x-axis value specific for given table type
  * param[out]:  None
- * return:      None
- * details:     None
+ * return:      float - y-axis value
+ * details:     Look in Tables_2D_T for table specific axis values units
  *===========================================================================*/
-void Swo_Print(char* format, ...) __attribute__ ((__format__(printf, 1, 2)));
-
-/*===========================================================================*
- * brief:       SWO printf wrapper allowing logging the calling module name and line num
- * param[in]:   moduleTag - a string containing module name
- * param[in]:   codeLine - the calling module line number
- * param[in]:   format - a string to be written to output
- * param[in]:   ... - additional agruments
- * param[out]:  None
- * return:      None
- * details:     It is recommended to use this function only via macro Debug_PrintLog
- *===========================================================================*/
-void Swo_PrintLogInternal(const char* moduleTag, const int codeLine, char* format, ...)
-                          __attribute__ ((__format__(printf, 3, 4)));
+float Tables_Get2DTableValue(Tables_2D_T tableType, float xValue);
 
 
 #endif

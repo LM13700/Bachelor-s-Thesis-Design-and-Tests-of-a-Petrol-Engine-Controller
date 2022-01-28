@@ -49,6 +49,7 @@
 /*===========================================================================*
  * Function: Utils_Itoa
  *===========================================================================*/
+/* TODO correct this function -> local adress return */
 char* Utils_Itoa(unsigned int number, unsigned int base)
 {
     char symbols[]= "0123456789ABCDEF";
@@ -65,6 +66,25 @@ char* Utils_Itoa(unsigned int number, unsigned int base)
     } while (number != 0);
 
     return (ptr);
+}
+
+/*===========================================================================*
+ * Function: Utils_FloatToUint32
+ *===========================================================================*/
+uint32_t Utils_FloatToUint32(float inValue)
+{
+    uint32_t result;
+
+    if (inValue >= 0)
+    {
+        result = (uint32_t)(inValue + 0.5F);
+    }
+    else
+    {
+        result = 0;
+    }
+
+    return result;
 }
 
 /*===========================================================================*

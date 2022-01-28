@@ -14,10 +14,14 @@
 
 #include "main.h"
 
+#include "engine_sensors.h"
+#include "ignition_driver.h"
+#include "injection_driver.h"
+#include "speed_density.h"
 #include "swo.h"
 #include "trigger_decoder.h"
 
-SWO_DefineModuleTag(MAIN);
+Swo_DefineModuleTag(MAIN);
 
 /*===========================================================================*
  *
@@ -37,6 +41,8 @@ SWO_DefineModuleTag(MAIN);
  *
  *===========================================================================*/
 
+volatile bool main_is_speed_trigger_occured;
+
 /*===========================================================================*
  *
  * LOCAL FUNCTION DECLARATION SECTION
@@ -50,7 +56,7 @@ SWO_DefineModuleTag(MAIN);
  * return:      None
  * details:     None
  *===========================================================================*/
-void MAIN_CallInits(void);
+void Main_CallInits(void);
 
 /*===========================================================================*
  *
@@ -63,11 +69,16 @@ void MAIN_CallInits(void);
  *===========================================================================*/
 int main(void)
 {
-    MAIN_CallInits();
+    Main_CallInits();
 
-    while(1)
+    while (1)
     {
-        __WFE();
+        WaitForInterrupt();
+        if (main_is_speed_trigger_occured)
+        {
+            SpDen_OnTriggerInterrupt();
+            main_is_speed_trigger_occured = false;
+        }
     }
 }
 
@@ -78,12 +89,29 @@ int main(void)
  *===========================================================================*/
 
 /*===========================================================================*
- * Function: MAIN_CallInits
+ * Function: Main_CallInits
  *===========================================================================*/
-void MAIN_CallInits(void)
+void Main_CallInits(void)
 {
-    SWO_Init();
-    TRIGD_Init();
+    DisableIRQ();
+
+    Swo_Init();
+    TrigD_Init(SpDen_TriggerCallback);
+    IgnDrv_Init();
+    InjDrv_Init();
+    EnSens_Init();
+    SpDen_Init();
+
+#if DEBUG
+    /* Debug pin PC13 init */
+    /* Toggle pin: GPIOC->ODR ^= GPIO_ODR_OD13; */
+    RCC->AHB1ENR |= RCC_AHB1ENR_GPIOCEN;
+    GPIOC->MODER |= GPIO_MODER_MODE13_0;
+#endif
+
+    main_is_speed_trigger_occured = false;
+
+    EnableIRQ();
 }
 
 
